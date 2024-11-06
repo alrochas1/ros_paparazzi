@@ -6,6 +6,8 @@ from rclpy.node import Node
 from sensor_msgs.msg import NavSatFix
 from autopilot_interfaces.msg import Waypoint
 
+import os # QUITAR (en un futuro)
+
 
 class Computer_Subscriber(Node):
 
@@ -34,10 +36,11 @@ class Computer_Subscriber(Node):
         self.get_logger().info(f'Publishing data: [{lat * 1e-7:.7f}, {lon * 1e-7:.7f}]')
 
 
-    # TEMPORAL: To simulate the data
+    # TEMPORAL: To simulate the data ------------------------------------------------------
     def get_data(self):
         try:
-            with open("~/data.txt", "r") as file:
+            config_file_path = os.path.expanduser("~/data.txt")
+            with open(config_file_path, "r") as file:
                 lines = file.readlines()
                 
                 # For moving randomly
@@ -45,8 +48,8 @@ class Computer_Subscriber(Node):
                 longitude = int(-3.7260463 * 1e7 + (random.randint(-10000, 10000)))
 
                 # For using the txt
-                latitude = int(self.get_value_from_line(lines, "latitude"))
-                longitude = int(self.get_value_from_line(lines, "longitude"))
+                # latitude = int(self.get_value_from_line(lines, "latitude"))
+                # longitude = int(self.get_value_from_line(lines, "longitude"))
                 altitude = int(self.get_value_from_line(lines, "altitude"))
                 wp_id = int(self.get_value_from_line(lines, "waypoint_id"))
                 
@@ -54,7 +57,15 @@ class Computer_Subscriber(Node):
             
         except Exception as e:
             self.get_logger().error(f"Error al leer el archivo: {e}")
-            return 40.4506399, -3.7260463, 650.0, 14  # Valores por defecto en caso de error
+            return 404506399, -37260463, 650000, 14  # Valores por defecto en caso de error
+        
+    def get_value_from_line(self, lines, key):
+        for line in lines:
+            if line.startswith(key):
+                return line.split("=")[1].strip()
+        return None
+    
+    # ------------------------------------------------------------------------------------------
 
 
 

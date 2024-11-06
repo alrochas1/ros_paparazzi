@@ -41,9 +41,10 @@ class Raspy_Publisher(Node):
         lat = msg.position.latitude
         lon = msg.position.longitude
         alt = msg.position.altitude
+        wp_id = msg.wp_id
 
         self.get_logger().info(f'Receiving data: [{lat}, {lon}]')
-        autopilot_data.waypoint_data.update(lat, lon, alt)
+        autopilot_data.waypoint_data.update(lat, lon, alt, wp_id)
         self.paparazzi_send.send()
 
 

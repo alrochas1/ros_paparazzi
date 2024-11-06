@@ -31,9 +31,9 @@ class Computer_Subscriber(Node):
         msg.position.longitude = float(lon)
         msg.position.latitude = float(lat)
         msg.position.altitude = float(alt)
-        msg.wp_id = wp_id
+        msg.wp_id = int(wp_id)
         self.publisher.publish(msg)
-        self.get_logger().info(f'Publishing data: [{lat * 1e-7:.7f}, {lon * 1e-7:.7f}]')
+        self.get_logger().info(f'Publishing data: [{lat * 1e-7:.7f}, {lon * 1e-7:.7f}] --> WP_ID = [{wp_id}]')
 
 
     # TEMPORAL: To simulate the data ------------------------------------------------------

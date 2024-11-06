@@ -26,17 +26,19 @@ class WaypointData():
         self.lat = 0
         self.lon = 0
         self.alt = 0
+        self.wp_id = 0
 
-    def update(self, lat, lon, alt):
+    def update(self, lat, lon, alt, id):
         self.lat = int(lat)
         self.lon = int(lon)
         self.alt = int(alt)
+        self.wp_id = int(id)
 
     def recover(self):
-        return [self.lat, self.lon, self.alt]
+        return [self.lat, self.lon, self.alt, self.wp_id]
 
     def __repr__(self):
-        return f"WaypointData(Latitud={self.lat}, Longitud={self.lon}, Altitud={self.alt})"
+        return f"WaypointData(Latitud={self.lat}, Longitud={self.lon}, Altitud={self.alt}, ID = {self.wp_id})"
 
     
 

@@ -51,10 +51,10 @@ class PPZI_DATALINK(threading.Thread):
         msg_id = SR_WAYPOINT
 
 
-        [lat, lon, alt] = autopilot_data.waypoint_data.recover()
+        [lat, lon, alt, wp_id] = autopilot_data.waypoint_data.recover()
         print(f"([PPZI_SEND] - Nuevo envio de dato: {autopilot_data.waypoint_data}")
         
-        wp_id = 14
+        # wp_id = 14
         # lat = int(40.4506399 * 1e7 + (random.randint(-10000, 10000)))
         # lon = int(-3.7260463 * 1e7 + (random.randint(-10000, 10000)))
         # alt = int(650.0 * 1e3)

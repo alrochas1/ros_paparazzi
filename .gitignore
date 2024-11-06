@@ -1,0 +1,19 @@
+# Archivos generados por colcon y otros sistemas de compilación
+build/
+install/
+log/
+.vscode/
+.idea/
+.DS_Store
+.cache/
+.colcon/
+*.pyc
+*.swp
+*.log
+
+# Archivos de configuración específicos de la Raspberry Pi o de usuario
+.bash_history
+.bashrc
+.profile
+
+./autopilot_test/core

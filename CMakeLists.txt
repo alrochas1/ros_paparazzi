@@ -24,7 +24,7 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# Install Python modules
+# Install Python modules (here you can create your executables)
 ament_python_install_package(${PROJECT_NAME})
 # Install Python executables
 install(PROGRAMS

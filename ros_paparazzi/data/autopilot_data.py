@@ -1,6 +1,6 @@
 # File with the info about the messages
 
-
+# For Telemetry messages
 class TelemetryData():
     def __init__(self):
         self.time = 0.0
@@ -21,6 +21,7 @@ class TelemetryData():
         return f"TelemetryData(time= {self.time}, longitude={self.longitude}, latitude={self.latitude}, altitude={self.altitude})"
     
 
+# For Datalink messages
 class WaypointData():
     def __init__(self):
         self.lat = 0
@@ -42,7 +43,7 @@ class WaypointData():
 
     
 
-# Inicializa la variable de datos de telemetría
+# Initialize the messages variables
 tiempo = 0
 telemetry_data = TelemetryData()
 waypoint_data = WaypointData()

@@ -44,8 +44,8 @@ class Computer_Subscriber(Node):
                 lines = file.readlines()
                 
                 # For moving randomly
-                latitude = int(40.4506399 * 1e7 + (random.randint(-10000, 10000)))
-                longitude = int(-3.7260463 * 1e7 + (random.randint(-10000, 10000)))
+                latitude = int(40.450925 * 1e7 + (random.randint(-10000, 10000)))
+                longitude = int(-3.727189 * 1e7 + (random.randint(-10000, 10000)))
 
                 # For using the txt
                 # latitude = int(self.get_value_from_line(lines, "latitude"))

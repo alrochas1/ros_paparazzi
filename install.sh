@@ -3,7 +3,7 @@
 SCRIPT_DIR=$(dirname "$(realpath $0)")
 cd "$SCRIPT_DIR/../.."
 
-# Verificar si estamos en la raíz de ros_ws
+# Verify if we are in the correct folder
 if [ ! -d "src" ]; then
   echo "Error: There is no ROS2 workspace"
   exit 1
@@ -21,7 +21,7 @@ fi
 
 source install/setup.bash
 
-# Verificar si la instalación fue exitosa
+# Verify if the instalation finished correctly
 if [ $? -eq 0 ]; then
   echo "Instalation finished correctly"
 else

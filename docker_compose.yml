@@ -1,0 +1,32 @@
+services:
+
+  raspy:
+    image: ucm:humble-desktop
+    volumes:
+      - /dev/ttyUSB0:/dev/ttyUSB0  # Monta el puerto serie
+      - ~/ROS2/ros_ws:/ros_ws      # Monta el workspace
+    network_mode: host              
+    command: /bin/bash -c "source /ros_ws/install/setup.bash && ros2 run ros_paparazzi raspy"
+    privileged: true
+
+
+  # Este es para el ordenador, en la raspberry no lo voy a usar nunca 
+  computer:
+    image: ucm:humble-desktop
+    volumes:
+      - /dev/ttyUSB0:/dev/ttyUSB0  # Monta el puerto serie
+      - ~/ROS2/ros_ws:/ros_ws      # Monta el workspace
+    network_mode: host              
+    command: /bin/bash -c "source /ros_ws/install/setup.bash && ros2 run ros_paparazzi computer"
+    privileged: true
+  
+  container:
+    image: ucm:humble-desktop
+    volumes:
+      - /dev/ttyUSB0:/dev/ttyUSB0  # Monta el puerto serie
+      # - /dev/serial0:/dev/serial0  # Monta el otro puerto serie
+      - ~/ROS2/ros_ws:/ros_ws      # Monta el workspace
+    stdin_open: true
+    tty: true
+    network_mode: host              
+    privileged: true

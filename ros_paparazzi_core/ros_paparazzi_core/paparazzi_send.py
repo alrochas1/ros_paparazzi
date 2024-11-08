@@ -4,14 +4,14 @@ import time
 # import random
 import threading
 
-from ros_paparazzi.data import autopilot_data
+from ros_paparazzi_core.data import autopilot_data
 
 COM_START_BYTE = 0x52  # R
 SR_WAYPOINT = 0x57     # W
 
 def calculate_checksums(data):
-    checksum = sum(data) & 0xFFFF
-    data.append(checksum & 0xFF)
+    checksum = sum(data) & 0xFFFF   # 2 Bytes
+    data.append(checksum & 0xFF)    
     data.append((checksum >> 8) & 0xFF)
 
 # Esta seguramente no es necesaria

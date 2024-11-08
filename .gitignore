@@ -16,4 +16,6 @@ log/
 .bashrc
 .profile
 
-./autopilot_test/core
+./ros_paparazzi/core
+./ros_paparazzi_core/ros_paparazzi_core/core
+./ros_paparazzi_interfaces/ros_paparazzi_interfaces/core

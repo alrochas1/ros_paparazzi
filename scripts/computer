@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-
-# This will launch the node directly
-import ros_paparazzi.computer_suscriber
-
-ros_paparazzi.computer_suscriber.main()

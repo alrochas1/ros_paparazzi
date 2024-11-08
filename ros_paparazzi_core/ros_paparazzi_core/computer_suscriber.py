@@ -4,7 +4,7 @@ import rclpy
 import random
 from rclpy.node import Node
 from sensor_msgs.msg import NavSatFix
-from autopilot_interfaces.msg import Waypoint
+from ros_paparazzi_interfaces.msg import Waypoint
 
 import os # QUITAR (en un futuro)
 

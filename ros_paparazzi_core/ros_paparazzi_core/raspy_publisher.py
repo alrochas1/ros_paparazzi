@@ -1,15 +1,18 @@
 # This is the node that will run on the raspberry
 
-import rclpy
-from rclpy.node import Node
-from sensor_msgs.msg import NavSatFix
-
 import threading
 import time
-from ros_paparazzi.data import autopilot_data
-from ros_paparazzi.paparazzi_receive import PPZI_TELEMETRY, TIME_THREAD
-from ros_paparazzi.paparazzi_send import PPZI_DATALINK
-from autopilot_interfaces.msg import Waypoint
+
+import rclpy
+from rclpy.node import Node
+
+from sensor_msgs.msg import NavSatFix
+from ros_paparazzi_interfaces.msg import Waypoint
+
+from ros_paparazzi_core.data import autopilot_data
+from ros_paparazzi_core.paparazzi_receive import PPZI_TELEMETRY, TIME_THREAD
+from ros_paparazzi_core.paparazzi_send import PPZI_DATALINK
+
 
 # Variables globales
 paparazzi_send = None

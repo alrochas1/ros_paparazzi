@@ -4,7 +4,7 @@ import math
 import time
 import threading
 
-from ros_paparazzi.data import autopilot_data
+from ros_paparazzi_core.data import autopilot_data
 
 
 # CONSTANTES

@@ -39,7 +39,14 @@ class Computer_Subscriber(Node):
     # TEMPORAL: To simulate the data ------------------------------------------------------
     def get_data(self):
         try:
-            config_file_path = os.path.expanduser("~/data.txt")
+
+            # Esto es una cutrez, pero me vale para probar
+            current_file_dir = os.path.dirname(os.path.abspath(__file__))
+            print(current_file_dir)
+            workspace_dir = os.path.abspath(os.path.join(current_file_dir, "../../../../../.."))
+            config_file_path = os.path.join(workspace_dir, "src", "ros_paparazzi", "data.txt")
+
+            # config_file_path = os.path.expanduser("~/data.txt")
             with open(config_file_path, "r") as file:
                 lines = file.readlines()
                 

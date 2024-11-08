@@ -28,7 +28,11 @@ For an easy install, a `./install.sh` is included (you can also use colcon to bu
 
 ## Running the Nodes
 
-At the moment there are two nodes that can be runned. For lauching the node in the Raspberry, run (inside a docker):
+At the moment there are two nodes that can be runned.
+
+![Nodes Diagram](rosgraph.png)
+
+For lauching the node in the Raspberry, run (inside a docker):
 
 ```
 ros2 run ros_paparazzi_core raspy

@@ -1,4 +1,4 @@
 latitude = 404506399
 longitude = -37260463
 altitude = 650000
-waypoint_id = 3
+waypoint_id = 6

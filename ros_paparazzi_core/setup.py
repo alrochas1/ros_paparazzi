@@ -19,8 +19,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-                'computer = autopilot_test.computer_suscriber:main',
-                'raspy = autopilot_test.raspy_publisher:main',
+                'computer = ros_paparazzi_core.computer_suscriber:main',
+                'raspy = ros_paparazzi_core.raspy_publisher:main',
         ],
     },
 )

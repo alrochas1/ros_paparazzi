@@ -18,7 +18,7 @@ class Computer_Subscriber(Node):
         self.create_timer(3, self.datalink_callback)
         
     def telemetry_callback(self, msg):
-        self.get_logger().info(f'Receiving data: [{msg.longitude}, {msg.latitude}, {msg.altitude}]')
+        self.get_logger().info(f'Receiving data: [{msg.latitude:.7f}, {msg.longitude:.7f}, {msg.altitude:.2f}]')
 
     def datalink_callback(self):
 

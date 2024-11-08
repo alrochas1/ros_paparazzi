@@ -46,7 +46,7 @@ class Raspy_Publisher(Node):
         alt = msg.position.altitude
         wp_id = msg.wp_id
 
-        self.get_logger().info(f'Receiving data: [{lat}, {lon}]')
+        self.get_logger().info(f'Receiving data: [{lat*1e-07:.7f}, {lon*1e-07:.7f}]')
         autopilot_data.waypoint_data.update(lat, lon, alt, wp_id)
         self.paparazzi_send.send()
 
@@ -61,7 +61,7 @@ class Raspy_Publisher(Node):
         msg.latitude = float(data.latitude*1e-07)
         msg.altitude = float(data.altitude/1000.0)
         self.publisher.publish(msg)
-        self.get_logger().info(f'Publishing data: [{msg.latitude}, {msg.longitude}, {msg.altitude}]')
+        self.get_logger().info(f'Publishing data: [{msg.latitude:.7f}, {msg.longitude:.7f}, {msg.altitude:.2f}]')
 
 
     # Hilo para monitorear cambios en telemetry_data

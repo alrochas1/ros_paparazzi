@@ -1,0 +1,4 @@
+latitude = 404508499
+longitude = -37280463
+altitude = 650000
+waypoint_id = 6

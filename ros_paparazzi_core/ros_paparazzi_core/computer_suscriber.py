@@ -6,7 +6,17 @@ from rclpy.node import Node
 from sensor_msgs.msg import NavSatFix
 from ros_paparazzi_interfaces.msg import Waypoint
 
+from pyproj import Proj, Transformer    # Library for the coordenates calc
+
 import os # QUITAR (en un futuro)
+
+# For convert the (x,y) to (lat, lon)
+def ltp_to_wgs84(origin_lat, origin_lon, x, y):
+    source_proj = f"+proj=ortho +lat_0={origin_lat} +lon_0={origin_lon}"
+    transformer = Transformer.from_proj(Proj(source_proj), Proj("EPSG:4326"), always_xy=True)
+
+    lon, lat = transformer.transform(x, y)
+    return lat, lon
 
 
 class Computer_Subscriber(Node):
@@ -16,6 +26,10 @@ class Computer_Subscriber(Node):
         self.subscription = self.create_subscription(NavSatFix, 'telemetry_gps', self.telemetry_callback, 10)
         self.publisher = self.create_publisher(Waypoint, 'datalink_gps', 10)
         self.create_timer(3, self.datalink_callback)
+
+        self.declare_parameter('units', 'WGS84')
+        self.units = self.get_parameter('units').get_parameter_value().string_value
+
         
     def telemetry_callback(self, msg):
         self.get_logger().info(f'Receiving data: [{msg.latitude:.7f}, {msg.longitude:.7f}, {msg.altitude:.2f}]')
@@ -43,19 +57,31 @@ class Computer_Subscriber(Node):
             # Esto es una cutrez, pero me vale para probar
             current_file_dir = os.path.dirname(os.path.abspath(__file__))
             workspace_dir = os.path.abspath(os.path.join(current_file_dir, "../../../../../.."))
-            config_file_path = os.path.join(workspace_dir, "src", "ros_paparazzi", "data.txt")
+            if self.units == 'WGS84':
+                config_file_path = os.path.join(workspace_dir, "src", "ros_paparazzi", "data_WGS.txt")
+            else:
+                config_file_path = os.path.join(workspace_dir, "src", "ros_paparazzi", "data_LTP.txt")
+                origin_lat = 40.4509250
+                origin_lon = -3.7271889
 
-            # config_file_path = os.path.expanduser("~/data.txt")
             with open(config_file_path, "r") as file:
                 lines = file.readlines()
                 
                 # For moving randomly
-                latitude = int(40.450925 * 1e7 + (random.randint(-10000, 10000)))
-                longitude = int(-3.727189 * 1e7 + (random.randint(-10000, 10000)))
+                # latitude = int(40.450925 * 1e7 + (random.randint(-10000, 10000)))
+                # longitude = int(-3.727189 * 1e7 + (random.randint(-10000, 10000)))
 
                 # For using the txt
-                # latitude = int(self.get_value_from_line(lines, "latitude"))
-                # longitude = int(self.get_value_from_line(lines, "longitude"))
+                if self.units == 'WGS84':
+                    latitude = int(self.get_value_from_line(lines, "latitude"))
+                    longitude = int(self.get_value_from_line(lines, "longitude"))
+                else:
+                    x = self.get_value_from_line(lines, "x")
+                    y = self.get_value_from_line(lines, "y")
+                    latitude, longitude = ltp_to_wgs84(origin_lat, origin_lon, x, y)
+                    latitude = latitude * 1e7
+                    longitude = longitude * 1e7
+            
                 altitude = int(self.get_value_from_line(lines, "altitude"))
                 wp_id = int(self.get_value_from_line(lines, "waypoint_id"))
                 

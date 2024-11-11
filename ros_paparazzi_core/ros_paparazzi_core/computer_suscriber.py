@@ -34,10 +34,10 @@ class Computer_Subscriber(Node):
     def telemetry_callback(self, msg):
 
         if msg.wp_id == 0:  # If id = 0, its the GPS Telemetry
-            self.get_logger().info(f'Receiving data: [{msg.latitude:.7f}, {msg.longitude:.7f}, {msg.altitude:.2f}]')
+            self.get_logger().info(f'Receiving data: [{msg.position.latitude:.7f}, {msg.position.longitude:.7f}, {msg.position.altitude:.2f}]')
         
         else:   # If id = 1, its the home coordinate
-            self.get_logger().info(f'Receiving HOME: [{msg.latitude:.7f}, {msg.longitude:.7f}, {msg.altitude:.2f}]')
+            self.get_logger().info(f'Receiving HOME: [{msg.position.latitude:.7f}, {msg.position.longitude:.7f}, {msg.position.altitude:.2f}]')
 
 
     def datalink_callback(self):

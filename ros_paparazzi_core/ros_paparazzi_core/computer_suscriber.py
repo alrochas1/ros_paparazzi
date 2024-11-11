@@ -23,7 +23,7 @@ class Computer_Subscriber(Node):
 
     def __init__(self):
         super().__init__('Computer_Suscriber')
-        self.subscription = self.create_subscription(NavSatFix, 'telemetry_gps', self.telemetry_callback, 10)
+        self.subscription = self.create_subscription(Waypoint, 'telemetry_gps', self.telemetry_callback, 10)
         self.publisher = self.create_publisher(Waypoint, 'datalink_gps', 10)
         self.create_timer(3, self.datalink_callback)
 
@@ -32,7 +32,13 @@ class Computer_Subscriber(Node):
 
         
     def telemetry_callback(self, msg):
-        self.get_logger().info(f'Receiving data: [{msg.latitude:.7f}, {msg.longitude:.7f}, {msg.altitude:.2f}]')
+
+        if msg.wp_id == 0:  # If id = 0, its the GPS Telemetry
+            self.get_logger().info(f'Receiving data: [{msg.latitude:.7f}, {msg.longitude:.7f}, {msg.altitude:.2f}]')
+        
+        else:   # If id = 1, its the home coordinate
+            self.get_logger().info(f'Receiving HOME: [{msg.latitude:.7f}, {msg.longitude:.7f}, {msg.altitude:.2f}]')
+
 
     def datalink_callback(self):
 

@@ -45,8 +45,9 @@ class WaypointData():
 
 # Initialize the messages variables
 tiempo = 0
-telemetry_data = TelemetryData()
-waypoint_data = WaypointData()
+telemetry_data = TelemetryData()    # For the telemetry GPS message
+waypoint_data = WaypointData()      # For sending Waypoints to the AP
+home_data = TelemetryData()         # For sending the HOME position to the computer
 
 
 

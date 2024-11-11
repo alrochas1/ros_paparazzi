@@ -12,6 +12,7 @@ PPZ_START_BYTE = 0x50  # "P"
 COM_START_BYTE = 0x52  # "R"
 PPZ_SONAR_BYTE = 0x53  # "S"
 PPZ_TELEMETRY_BYTE = 0x54  # "T"
+PPZ_HOME_BYTE = 0x48; # "H"
 PPZ_MEASURE_BYTE = 0x4D  # "M"
 COM_FINAL_BYTE = 0x46  # "F"
 COM_ANSWER_BYTE = 0x4F  # "O"
@@ -158,6 +159,7 @@ class PPZI_TELEMETRY(threading.Thread):
                     # with open(name_telemetria, "a") as telemetria:
                     #     telemetria.write(f"{time.time()} {datappzz[1]} {longitud} {latitud} {altitud} {d_sonar} {c_sonar}\n")
 
+                # Este no se esta usando
                 if datappzz[1] == PPZ_MEASURE_BYTE:
                     if len(datappzz) != 26:
                         print(f"[PPZI_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 26, Received {len(datappzz)}")
@@ -198,8 +200,7 @@ class PPZI_TELEMETRY(threading.Thread):
                     # with open(name_puntos_medida, "a") as puntos_medida:
                     #     puntos_medida.write(f"{autopilot_data.tiempo} {datappzz[1]} {longitud} {latitud} {altitud} {d_sonar} {c_sonar}\n")
 
-                    
-
+                # Este no se esta usando
                 if datappzz[1] == PPZ_SONAR_BYTE:
                     print(datappzz)
                     if len(datappzz) != 6:
@@ -226,6 +227,43 @@ class PPZI_TELEMETRY(threading.Thread):
                     # hex_checksum = itoh(checksum, 2)
                     
                     # fd.write(bytes([COM_START_BYTE, PPZ_START_BYTE, *hex_tiempo, *hex_profundidad, *hex_checksum]))
+
+
+                if datappzz[1] == PPZ_HOME_BYTE:
+                    if len(datappzz) != 20:
+                        print(f"[PPZI_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 20, Received {len(datappzz)}")
+                        time.sleep(1)
+                        continue
+
+                    hex_checksumppzz = [datappzz[19], datappzz[18]]
+                    checksumppzz = serial_byteToint(hex_checksumppzz, 2)
+
+                    if not compare_checksum(datappzz, checksumppzz, data_av):
+                        print("[PPZI_RECEIVE] - Checksum erróneo.")
+                        time.sleep(1)
+                        continue
+
+                    # print("TELEMETRIA")
+
+                    sign_long = datappzz[4]
+                    hex_long = [datappzz[8], datappzz[7], datappzz[6], datappzz[5]]
+                    longitud = calculate_signo(sign_long) * serial_byteToint(hex_long, 4)
+
+                    sign_lat = datappzz[9]
+                    hex_lat = [datappzz[13], datappzz[12], datappzz[11], datappzz[10]]
+                    print(hex_lat)
+                    latitud = calculate_signo(sign_lat) * serial_byteToint(hex_lat, 4)
+
+                    sign_alt = datappzz[14]
+                    hex_alt = [datappzz[17], datappzz[16], datappzz[15]]
+                    # altitud = calculate_signo(sign_alt) * serial_byteToint(hex_alt, 3)
+                    altitud = 650000      # Hay algún problema con la altitud
+
+                    # print(f"Longitud: {longitud}, Latitud: {latitud}, Altitud: {altitud}, D_Sonar: {d_sonar}, C_Sonar: {c_sonar}, Checksum: {checksumppzz}")
+                    # autopilot_data.telemetry_data = [longitud, latitud, altitud, d_sonar, c_sonar]  # TERMINAR
+                    autopilot_data.home_data.update(autopilot_data.tiempo, longitud, latitud, altitud)
+                    print(f"([PPZI_RECEIVE] - Nueva posición de HOME: {autopilot_data.home_data}")
+
 
             time.sleep(1)
 

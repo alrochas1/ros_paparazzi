@@ -36,8 +36,12 @@ class Computer_Subscriber(Node):
         if msg.wp_id == 0:  # If id = 0, its the GPS Telemetry
             self.get_logger().info(f'Receiving data: [{msg.gps.latitude:.7f}, {msg.gps.longitude:.7f}, {msg.gps.altitude:.2f}]')
         
-        else:   # If id = 1, its the home coordinate
+        elif msg.wp_id == 1:   # If id = 1, its the home coordinate
+            self.origin_lat = msg.gps.latitude
+            self.origin_lon = msg.gps.longitude
             self.get_logger().info(f'Receiving HOME: [{msg.gps.latitude:.7f}, {msg.gps.longitude:.7f}, {msg.gps.altitude:.2f}]')
+        else:
+            self.get_logger().info(f'ERROR. wp_id {msg.wp_id} not supported')
 
 
     def datalink_callback(self):
@@ -68,8 +72,8 @@ class Computer_Subscriber(Node):
             else:
                 config_file_path = os.path.join(workspace_dir, "src", "ros_paparazzi", "data_LTP.txt")
                 # TODO: Cambiar para que coja el HOME 
-                origin_lat = 40.4509250
-                origin_lon = -3.7271889
+                self.origin_lat = 40.4509250
+                self.origin_lon = -3.7271889
 
             with open(config_file_path, "r") as file:
                 lines = file.readlines()
@@ -85,7 +89,7 @@ class Computer_Subscriber(Node):
                 else:
                     x = self.get_value_from_line(lines, "x")
                     y = self.get_value_from_line(lines, "y")
-                    latitude, longitude = ltp_to_wgs84(origin_lat, origin_lon, x, y)
+                    latitude, longitude = ltp_to_wgs84(self.origin_lat, self.origin_lon, x, y)
                     latitude = latitude * 1e7
                     longitude = longitude * 1e7
             

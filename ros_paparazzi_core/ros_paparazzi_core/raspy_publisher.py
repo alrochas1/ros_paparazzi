@@ -42,9 +42,9 @@ class Raspy_Publisher(Node):
     # Funcion que manda los mensajes datalink por el puerto serie cuando los recibe del topic
     def datalink_callback(self, msg):
 
-        lat = msg.position.latitude
-        lon = msg.position.longitude
-        alt = msg.position.altitude
+        lat = msg.gps.latitude
+        lon = msg.gps.longitude
+        alt = msg.gps.altitude
         wp_id = msg.wp_id
 
         self.get_logger().info(f'Receiving data: [{lat*1e-07:.7f}, {lon*1e-07:.7f}]')

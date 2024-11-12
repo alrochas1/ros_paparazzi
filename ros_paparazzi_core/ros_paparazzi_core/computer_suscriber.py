@@ -27,8 +27,12 @@ class Computer_Subscriber(Node):
         self.publisher = self.create_publisher(Waypoint, 'datalink_gps', 10)
         self.create_timer(3, self.datalink_callback)
 
-        self.declare_parameter('units', 'WGS84')
+        self.declare_parameter('units', 'LTP')
         self.units = self.get_parameter('units').get_parameter_value().string_value
+
+        # For HOME position (default)
+        self.origin_lat = 40.4509250
+        self.origin_lon = -3.7271889
 
         
     def telemetry_callback(self, msg):
@@ -70,10 +74,8 @@ class Computer_Subscriber(Node):
             if self.units == 'WGS84':
                 config_file_path = os.path.join(workspace_dir, "src", "ros_paparazzi", "data_WGS.txt")
             else:
-                config_file_path = os.path.join(workspace_dir, "src", "ros_paparazzi", "data_LTP.txt")
-                # TODO: Cambiar para que coja el HOME 
-                self.origin_lat = 40.4509250
-                self.origin_lon = -3.7271889
+                config_file_path = os.path.join(workspace_dir, "src", "ros_paparazzi", "data_LTP.txt") 
+                
 
             with open(config_file_path, "r") as file:
                 lines = file.readlines()

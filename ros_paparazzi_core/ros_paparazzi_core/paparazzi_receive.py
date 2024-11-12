@@ -153,7 +153,7 @@ class PPZI_TELEMETRY(threading.Thread):
 
                     # print(f"Longitud: {longitud}, Latitud: {latitud}, Altitud: {altitud}, D_Sonar: {d_sonar}, C_Sonar: {c_sonar}, Checksum: {checksumppzz}")
                     # autopilot_data.telemetry_data = [longitud, latitud, altitud, d_sonar, c_sonar]  # TERMINAR
-                    autopilot_data.telemetry_data.update(autopilot_data.tiempo, longitud, latitud, altitud)
+                    autopilot_data.telemetry_data.update(autopilot_data.tiempo, longitud, latitud, altitud, 0)
                     print(f"([PPZI_RECEIVE] - Nuevo dato de telemetría: {autopilot_data.telemetry_data}")         
 
                     # with open(name_telemetria, "a") as telemetria:
@@ -251,7 +251,6 @@ class PPZI_TELEMETRY(threading.Thread):
 
                     sign_lat = datappzz[9]
                     hex_lat = [datappzz[13], datappzz[12], datappzz[11], datappzz[10]]
-                    print(hex_lat)
                     latitud = calculate_signo(sign_lat) * serial_byteToint(hex_lat, 4)
 
                     sign_alt = datappzz[14]
@@ -261,7 +260,7 @@ class PPZI_TELEMETRY(threading.Thread):
 
                     # print(f"Longitud: {longitud}, Latitud: {latitud}, Altitud: {altitud}, D_Sonar: {d_sonar}, C_Sonar: {c_sonar}, Checksum: {checksumppzz}")
                     # autopilot_data.telemetry_data = [longitud, latitud, altitud, d_sonar, c_sonar]  # TERMINAR
-                    autopilot_data.home_data.update(autopilot_data.tiempo, longitud, latitud, altitud)
+                    autopilot_data.home_data.update(autopilot_data.tiempo, longitud, latitud, altitud, 1)
                     print(f"([PPZI_RECEIVE] - Nueva posición de HOME: {autopilot_data.home_data}")
 
 

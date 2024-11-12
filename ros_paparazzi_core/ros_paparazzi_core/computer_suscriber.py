@@ -34,10 +34,10 @@ class Computer_Subscriber(Node):
     def telemetry_callback(self, msg):
 
         if msg.wp_id == 0:  # If id = 0, its the GPS Telemetry
-            self.get_logger().info(f'Receiving data: [{msg.position.latitude:.7f}, {msg.position.longitude:.7f}, {msg.position.altitude:.2f}]')
+            self.get_logger().info(f'Receiving data: [{msg.gps.latitude:.7f}, {msg.gps.longitude:.7f}, {msg.gps.altitude:.2f}]')
         
         else:   # If id = 1, its the home coordinate
-            self.get_logger().info(f'Receiving HOME: [{msg.position.latitude:.7f}, {msg.position.longitude:.7f}, {msg.position.altitude:.2f}]')
+            self.get_logger().info(f'Receiving HOME: [{msg.gps.latitude:.7f}, {msg.gps.longitude:.7f}, {msg.gps.altitude:.2f}]')
 
 
     def datalink_callback(self):
@@ -48,9 +48,9 @@ class Computer_Subscriber(Node):
         msg = Waypoint()
         # msg.header.stamp.sec = int(autopilot_data.tiempo)
         # msg.header.stamp.nanosec = int(1e+9*(autopilot_data.tiempo - int(autopilot_data.tiempo)))
-        msg.position.longitude = float(lon)
-        msg.position.latitude = float(lat)
-        msg.position.altitude = float(alt)
+        msg.gps.longitude = float(lon)
+        msg.gps.latitude = float(lat)
+        msg.gps.altitude = float(alt)
         msg.wp_id = int(wp_id)
         self.publisher.publish(msg)
         self.get_logger().info(f'Publishing data: [{lat * 1e-7:.7f}, {lon * 1e-7:.7f}] --> WP_ID = [{wp_id}]')
@@ -67,6 +67,7 @@ class Computer_Subscriber(Node):
                 config_file_path = os.path.join(workspace_dir, "src", "ros_paparazzi", "data_WGS.txt")
             else:
                 config_file_path = os.path.join(workspace_dir, "src", "ros_paparazzi", "data_LTP.txt")
+                # TODO: Cambiar para que coja el HOME 
                 origin_lat = 40.4509250
                 origin_lon = -3.7271889
 

@@ -31,7 +31,7 @@ class Raspy_Publisher(Node):
         self.last_telemetry_data = None
         self.last_home_data = None
         self.start_monitor_thread(autopilot_data.telemetry_data, self.telemetry_callback, self.last_telemetry_data)
-        self.start_monitor_thread(autopilot_data.home_data, self.home_callback, self.last_home_data)
+        self.start_monitor_thread(autopilot_data.home_data, self.telemetry_callback, self.last_home_data)
 
         # Clase para mandar datos por el puerto serie (datalink)
         port = "/dev/ttyUSB0"
@@ -53,33 +53,20 @@ class Raspy_Publisher(Node):
         
 
     # --------------------------------- FUNCIONES DE MONITOREO ---------------------------------
-    # Esto se puede cambiar posiblemente
 
     # Funcion que publica en el topic los mensajes telemetry que recibe por el puerto serie
     def telemetry_callback(self, data):
         # data = [float(i) for i in data] # Hay que convertir los datos a Float64, que es lo que acepta NatSat
         msg = Waypoint()
-        msg.position.header.stamp.sec = int(autopilot_data.tiempo)
-        msg.position.header.stamp.nanosec = int(1e+9*(autopilot_data.tiempo - int(autopilot_data.tiempo)))
-        msg.position.longitude = float(data.longitude*1e-07)
-        msg.position.latitude = float(data.latitude*1e-07)
-        msg.position.altitude = float(data.altitude/1000.0)
-        msg.wp_id = 0
+        msg.gps.header.stamp.sec = int(autopilot_data.tiempo)
+        msg.gps.header.stamp.nanosec = int(1e+9*(autopilot_data.tiempo - int(autopilot_data.tiempo)))
+        msg.gps.longitude = float(data.longitude*1e-07)
+        msg.gps.latitude = float(data.latitude*1e-07)
+        msg.gps.altitude = float(data.altitude/1000.0)
+        msg.wp_id = int(data.wp_id)
         self.publisher.publish(msg)
-        self.get_logger().info(f'Publishing Telemetry_Data: [{msg.position.latitude:.7f}, {msg.position.longitude:.7f}, {msg.position.altitude:.2f}]')
+        self.get_logger().info(f'Publishing Telemetry_Data[{msg.wp_id}]: [{msg.gps.latitude:.7f}, {msg.gps.longitude:.7f}, {msg.gps.altitude:.2f}]')
 
-
-    # Funcion que publica en el topic los mensajes home que recibe por el puerto serie
-    def home_callback(self, data):
-        msg = Waypoint()
-        msg.position.header.stamp.sec = int(autopilot_data.tiempo)
-        msg.position.header.stamp.nanosec = int(1e+9*(autopilot_data.tiempo - int(autopilot_data.tiempo)))
-        msg.position.longitude = float(data.longitude*1e-07)
-        msg.position.latitude = float(data.latitude*1e-07)
-        msg.position.altitude = float(data.altitude/1000.0)
-        msg.wp_id = 1
-
-        self.get_logger().info(f'Home data changed: {data}')
 
 
     # Función para iniciar un hilo de monitoreo genérico

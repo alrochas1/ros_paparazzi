@@ -19,6 +19,8 @@ paparazzi_send = None
 paparazzi_receive = None
 time_thread = None
 
+PORT = "/dev/ttyUSB0"
+
 
 class Raspy_Publisher(Node):
 
@@ -34,8 +36,7 @@ class Raspy_Publisher(Node):
         self.start_monitor_thread(autopilot_data.home_data, self.telemetry_callback, self.last_home_data)
 
         # Clase para mandar datos por el puerto serie (datalink)
-        port = "/dev/ttyUSB0"
-        self.paparazzi_send = PPZI_DATALINK(port)
+        self.paparazzi_send = PPZI_DATALINK(PORT)
         self.paparazzi_send.run()
 
 
@@ -102,14 +103,12 @@ def main(args=None):
     global paparazzi_send, paparazzi_receive, time_thread
     rclpy.init(args=args)
 
-    port = "/dev/ttyUSB0"
-
     # Lanza los hilos
     paparazzi_time = TIME_THREAD()
     time_thread = threading.Thread(target=paparazzi_time.run, args=(autopilot_data,))
     time_thread.start()
 
-    paparazzi_receive = PPZI_TELEMETRY(port)
+    paparazzi_receive = PPZI_TELEMETRY(PORT)
     receive_thread = threading.Thread(target=paparazzi_receive.run)
     receive_thread.start()
 

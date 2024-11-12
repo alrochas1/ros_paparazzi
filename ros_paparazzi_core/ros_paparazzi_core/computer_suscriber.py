@@ -31,8 +31,8 @@ class Computer_Subscriber(Node):
         self.units = self.get_parameter('units').get_parameter_value().string_value
 
         # For HOME position (default)
-        self.origin_lat = 40.4509250
-        self.origin_lon = -3.7271889
+        self.origin_lat = None
+        self.origin_lon = None
 
         
     def telemetry_callback(self, msg):
@@ -60,8 +60,9 @@ class Computer_Subscriber(Node):
         msg.gps.latitude = float(lat)
         msg.gps.altitude = float(alt)
         msg.wp_id = int(wp_id)
-        self.publisher.publish(msg)
-        self.get_logger().info(f'Publishing data: [{lat * 1e-7:.7f}, {lon * 1e-7:.7f}] --> WP_ID = [{wp_id}]')
+        if (self.origin_lon is not None) and (self.origin_lat is not None):
+            self.publisher.publish(msg)
+            self.get_logger().info(f'Publishing data: [{lat * 1e-7:.7f}, {lon * 1e-7:.7f}] --> WP_ID = [{wp_id}]')
 
 
     # TEMPORAL: To simulate the data ------------------------------------------------------

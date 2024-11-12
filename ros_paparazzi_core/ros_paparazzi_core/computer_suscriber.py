@@ -50,17 +50,17 @@ class Computer_Subscriber(Node):
 
     def datalink_callback(self):
 
-        # Temporal
-        [lat, lon, alt, wp_id] = self.get_data()
-
-        msg = Waypoint()
-        # msg.header.stamp.sec = int(autopilot_data.tiempo)
-        # msg.header.stamp.nanosec = int(1e+9*(autopilot_data.tiempo - int(autopilot_data.tiempo)))
-        msg.gps.longitude = float(lon)
-        msg.gps.latitude = float(lat)
-        msg.gps.altitude = float(alt)
-        msg.wp_id = int(wp_id)
         if (self.origin_lon is not None) and (self.origin_lat is not None):
+            # Temporal
+            [lat, lon, alt, wp_id] = self.get_data()
+
+            msg = Waypoint()
+            # msg.header.stamp.sec = int(autopilot_data.tiempo)
+            # msg.header.stamp.nanosec = int(1e+9*(autopilot_data.tiempo - int(autopilot_data.tiempo)))
+            msg.gps.longitude = float(lon)
+            msg.gps.latitude = float(lat)
+            msg.gps.altitude = float(alt)
+            msg.wp_id = int(wp_id)
             self.publisher.publish(msg)
             self.get_logger().info(f'Publishing data: [{lat * 1e-7:.7f}, {lon * 1e-7:.7f}] --> WP_ID = [{wp_id}]')
 

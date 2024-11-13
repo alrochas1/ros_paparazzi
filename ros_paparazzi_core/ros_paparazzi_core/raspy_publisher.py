@@ -19,7 +19,8 @@ paparazzi_send = None
 paparazzi_receive = None
 time_thread = None
 
-PORT = "/dev/ttyUSB0"
+# PORT = "/dev/ttyUSB0"
+PORT = "/dev/serial0"
 
 
 class Raspy_Publisher(Node):

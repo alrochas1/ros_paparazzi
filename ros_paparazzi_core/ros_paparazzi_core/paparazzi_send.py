@@ -8,6 +8,7 @@ from ros_paparazzi_core.data import autopilot_data
 
 COM_START_BYTE = 0x52  # R
 SR_WAYPOINT = 0x57     # W
+SR_HOME = 0x48         # H
 
 def calculate_checksums(data):
     checksum = sum(data) & 0xFFFF   # 2 Bytes
@@ -41,14 +42,14 @@ class PPZI_DATALINK(threading.Thread):
             self.running = False
 
 
-    def send(self):
+    def send(self, msg_id):
 
         if not self.ser:
             print("Puerto serie no está disponible.")
             return
 
-        length = 0x11  # 17 bytes
-        msg_id = SR_WAYPOINT
+        # length = 0x11  # 17 bytes
+        # msg_id = SR_WAYPOINT
 
 
         [lat, lon, alt, wp_id] = autopilot_data.waypoint_data.recover()

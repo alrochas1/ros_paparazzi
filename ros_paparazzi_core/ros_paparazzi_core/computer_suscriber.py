@@ -31,10 +31,45 @@ class Computer_Subscriber(Node):
         self.units = self.get_parameter('units').get_parameter_value().string_value
 
         # For HOME position (default)
-        self.origin_lat = None
-        self.origin_lon = None
+        self.update_HOME()
+        # self.origin_lat = None
+        # self.origin_lon = None
 
+    
+    # To send the HOME request message
+    def update_HOME(self):
+
+        wp_id = 0
+        data = [0, 0, 0, wp_id]
+        self.send_datalink(data)    # Here the lat, lon, alt is not necesary
+
+
+    # To send the waypoints to the AP
+    def datalink_callback(self):
+
+        # Temporal
+        # [lat, lon, alt, wp_id] = self.get_data()
+        data = self.get_data()
+        self.send_datalink(data)
+
+            
+    # To publish in the datalink topic
+    def send_datalink(self, data):
+
+        [lat, lon, alt, wp_id] = data
         
+        msg = Waypoint()
+        # msg.header.stamp.sec = int(autopilot_data.tiempo)
+        # msg.header.stamp.nanosec = int(1e+9*(autopilot_data.tiempo - int(autopilot_data.tiempo)))
+        msg.gps.latitude = float(lat)
+        msg.gps.longitude = float(lon)
+        msg.gps.altitude = float(alt)
+        msg.wp_id = int(wp_id)
+        self.publisher.publish(msg)
+        self.get_logger().info(f'Publishing data: [{lat * 1e-7:.7f}, {lon * 1e-7:.7f}] --> WP_ID = [{wp_id}]')
+
+
+    # To receive the messages from the AP
     def telemetry_callback(self, msg):
 
         if msg.wp_id == 0:  # If id = 0, its the GPS Telemetry
@@ -48,28 +83,11 @@ class Computer_Subscriber(Node):
             self.get_logger().info(f'ERROR. wp_id {msg.wp_id} not supported')
 
 
-    def datalink_callback(self):
-
-        if (self.origin_lon is not None) and (self.origin_lat is not None):
-            # Temporal
-            [lat, lon, alt, wp_id] = self.get_data()
-
-            msg = Waypoint()
-            # msg.header.stamp.sec = int(autopilot_data.tiempo)
-            # msg.header.stamp.nanosec = int(1e+9*(autopilot_data.tiempo - int(autopilot_data.tiempo)))
-            msg.gps.longitude = float(lon)
-            msg.gps.latitude = float(lat)
-            msg.gps.altitude = float(alt)
-            msg.wp_id = int(wp_id)
-            self.publisher.publish(msg)
-            self.get_logger().info(f'Publishing data: [{lat * 1e-7:.7f}, {lon * 1e-7:.7f}] --> WP_ID = [{wp_id}]')
-
-
     # TEMPORAL: To simulate the data ------------------------------------------------------
     def get_data(self):
         try:
 
-            # Esto es una cutrez, pero me vale para probar
+            # Esto es un poco cutre, pero me vale para probar
             current_file_dir = os.path.dirname(os.path.abspath(__file__))
             workspace_dir = os.path.abspath(os.path.join(current_file_dir, "../../../../../.."))
             if self.units == 'WGS84':

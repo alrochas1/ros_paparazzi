@@ -19,6 +19,11 @@ paparazzi_send = None
 paparazzi_receive = None
 time_thread = None
 
+
+SR_WAYPOINT = 0x57     # W
+SR_HOME = 0X48         # H
+
+
 # PORT = "/dev/ttyUSB0"
 PORT = "/dev/serial0"
 
@@ -51,7 +56,10 @@ class Raspy_Publisher(Node):
 
         self.get_logger().info(f'Receiving data: [{lat*1e-07:.7f}, {lon*1e-07:.7f}]')
         autopilot_data.waypoint_data.update(lat, lon, alt, wp_id)
-        self.paparazzi_send.send()
+        
+        if wp_id == 0: msg_type = SR_HOME
+        else: msg_type = SR_WAYPOINT
+        self.paparazzi_send.send(msg_type)
         
 
     # --------------------------------- FUNCIONES DE MONITOREO ---------------------------------

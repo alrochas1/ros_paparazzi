@@ -9,6 +9,7 @@ from ros_paparazzi_interfaces.msg import Waypoint
 from pyproj import Proj, Transformer    # Library for the coordenates calc
 
 import os # QUITAR (en un futuro)
+import time
 
 # For convert the (x,y) to (lat, lon)
 def ltp_to_wgs84(origin_lat, origin_lon, x, y):
@@ -25,14 +26,15 @@ class Computer_Subscriber(Node):
         super().__init__('Computer_Suscriber')
         self.subscription = self.create_subscription(Waypoint, 'telemetry_gps', self.telemetry_callback, 10)
         self.publisher = self.create_publisher(Waypoint, 'datalink_gps', 10)
-        self.create_timer(3, self.datalink_callback)
+        # self.create_timer(3, self.datalink_callback)
+        self.timer = None
 
         self.declare_parameter('units', 'LTP')
         self.units = self.get_parameter('units').get_parameter_value().string_value
 
         # For HOME position (default)
+        self.origin_lat = None
         self.update_HOME()
-        # self.origin_lat = None
         # self.origin_lon = None
 
     
@@ -40,9 +42,9 @@ class Computer_Subscriber(Node):
     def update_HOME(self):
 
         wp_id = 0
-        data = [0, 0, 0, wp_id]
+        data = [0.0, 0.0, 0.0, wp_id]
         self.send_datalink(data)    # Here the lat, lon, alt is not necesary
-
+        
 
     # To send the waypoints to the AP
     def datalink_callback(self):
@@ -79,6 +81,9 @@ class Computer_Subscriber(Node):
             self.origin_lat = msg.gps.latitude
             self.origin_lon = msg.gps.longitude
             self.get_logger().info(f'Receiving HOME: [{msg.gps.latitude:.7f}, {msg.gps.longitude:.7f}, {msg.gps.altitude:.2f}]')
+            if self.timer == None:
+                self.timer = self.create_timer(3, self.datalink_callback)    
+            
         else:
             self.get_logger().info(f'ERROR. wp_id {msg.wp_id} not supported')
 

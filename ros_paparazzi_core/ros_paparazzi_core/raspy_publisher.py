@@ -54,7 +54,7 @@ class Raspy_Publisher(Node):
         alt = msg.gps.altitude
         wp_id = msg.wp_id
 
-        self.get_logger().info(f'Receiving data: [{lat*1e-07:.7f}, {lon*1e-07:.7f}]')
+        self.get_logger().info(f'Receiving data [{wp_id}]: [{lat*1e-07:.7f}, {lon*1e-07:.7f}]')
         autopilot_data.waypoint_data.update(lat, lon, alt, wp_id)
         
         if wp_id == 0: msg_type = SR_HOME

@@ -44,7 +44,9 @@ And in your computer, run:
 ros2 run ros_paparazzi_core computer
 ```
 
-If you have everything connected, you should see the waypoint defined in the `data.txt` move
+If you have everything connected, you should see the waypoint defined in the `data_WGS.txt` move
+
+TODO: Add the ROS argument instructions
 
 
 

@@ -33,7 +33,8 @@ class Raspy_Publisher(Node):
         self.monitor_thread.start()
 
         # Clase para mandar datos por el puerto serie (datalink)
-        port = "/dev/ttyUSB0"
+        port = "/dev/serial0"
+        #port = "/dev/ttyUSB0"
         self.paparazzi_send = PPZI_DATALINK(port)
         self.paparazzi_send.run()
         

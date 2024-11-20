@@ -88,7 +88,7 @@ def main(args=None):
     global paparazzi_send, paparazzi_receive, time_thread
     rclpy.init(args=args)
 
-    port = "/dev/ttyUSB0"
+    port = "/dev/serial0"
 
     # Lanza los hilos
     paparazzi_time = TIME_THREAD()

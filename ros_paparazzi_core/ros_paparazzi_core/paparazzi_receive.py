@@ -141,9 +141,11 @@ class PPZI_TELEMETRY(threading.Thread):
                     hex_lat = [datappzz[13], datappzz[12], datappzz[11], datappzz[10]]
                     latitud = calculate_signo(sign_lat) * serial_byteToint(hex_lat, 4)
 
-                    sign_alt = datappzz[14]
-                    hex_alt = [datappzz[17], datappzz[16], datappzz[15]]
-                    altitud = calculate_signo(sign_alt) * serial_byteToint(hex_alt, 3)
+                    # Temporalmente voy a quitar la altitud
+                    # sign_alt = datappzz[14]
+                    # hex_alt = [datappzz[17], datappzz[16], datappzz[15]]
+                    # altitud = calculate_signo(sign_alt) * serial_byteToint(hex_alt, 3)
+                    altitud = 650000
 
                     hex_d_sonar = [datappzz[21], datappzz[20], datappzz[19], datappzz[18]]
                     d_sonar = serial_byteToint(hex_d_sonar, 4)

@@ -43,6 +43,9 @@ class Raspy_Publisher(Node):
 
         # Clase para mandar datos por el puerto serie (datalink)
         self.paparazzi_send = PPZI_DATALINK(PORT)
+        port = "/dev/serial0"
+        #port = "/dev/ttyUSB0"
+        self.paparazzi_send = PPZI_DATALINK(port)
         self.paparazzi_send.run()
 
 

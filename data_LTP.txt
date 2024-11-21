@@ -1,4 +1,4 @@
-x = -30
+x = 30
 y = -35
 altitude = 650000
 waypoint_id = 6

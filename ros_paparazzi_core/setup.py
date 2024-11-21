@@ -21,6 +21,7 @@ setup(
         'console_scripts': [
                 'computer = ros_paparazzi_core.computer_suscriber:main',
                 'raspy = ros_paparazzi_core.raspy_publisher:main',
+                'send = ros_paparazzi_core.waypoint_sender:main',
         ],
     },
 )

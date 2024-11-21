@@ -1,5 +1,6 @@
-# This is the old node that was used to send and receive the data from the raspy
-# Not used
+# This node send the waypoint in the txt to the raspyimport rclpy
+# TODO: Delete the txt and use something more elaborated (the Graphic API ??)
+# TODO: Maybe made the number of waypoints to send dynamic
 
 import rclpy
 from rclpy.node import Node
@@ -19,22 +20,21 @@ def ltp_to_wgs84(origin_lat, origin_lon, x, y):
     return lat, lon
 
 
-class Computer_Subscriber(Node):
+class Waypoint_Sender(Node):
 
     def __init__(self):
-        super().__init__('Computer_Suscriber')
-        self.subscription = self.create_subscription(NavSatFix, 'telemetry_gps', self.telemetry_callback, 10)
+        super().__init__('Waypoint_Sender')
         self.publisher = self.create_publisher(Waypoint, 'datalink_gps', 10)
-        self.create_timer(3, self.datalink_callback)
 
-        self.declare_parameter('units', 'WGS84')
+        self.declare_parameter('units', 'LTP')
         self.units = self.get_parameter('units').get_parameter_value().string_value
 
-        
-    def telemetry_callback(self, msg):
-        self.get_logger().info(f'Receiving data: [{msg.latitude:.7f}, {msg.longitude:.7f}, {msg.altitude:.2f}]')
+        # The node will send the waypoint just one time
+        self.send_waypoint()
+        self.get_logger().info("All the waypoints were sent. Shutting down")
 
-    def datalink_callback(self):
+
+    def send_waypoint(self):
 
         # Temporal
         [lat, lon, alt, wp_id] = self.get_data()
@@ -101,19 +101,13 @@ class Computer_Subscriber(Node):
     # ------------------------------------------------------------------------------------------
 
 
-
-
 def main(args=None):
+
     rclpy.init(args=args)
-
-    computer_subscriber = Computer_Subscriber()
-
-    rclpy.spin(computer_subscriber)
-
-    computer_subscriber.destroy_node()
+    waypoint_sender = Waypoint_Sender()
+    waypoint_sender.destroy_node()
     rclpy.shutdown()
 
 
 if __name__ == '__main__':
     main()
-

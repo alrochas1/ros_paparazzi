@@ -1,4 +1,5 @@
 # This node is used for receiving the GPS telemetry data 
+# TODO: Store the data somewhere
 
 import rclpy
 from rclpy.node import Node

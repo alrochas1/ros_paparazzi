@@ -6,8 +6,16 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import NavSatFix
 from ros_paparazzi_interfaces.msg import Waypoint
+from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
 
 from pyproj import Proj, Transformer    # Library for the coordenates calc
+
+
+qos_profile = QoSProfile(
+    reliability=ReliabilityPolicy.RELIABLE,
+    durability=DurabilityPolicy.TRANSIENT_LOCAL,
+    depth=10
+)
 
 import os # QUITAR (en un futuro)
 
@@ -24,7 +32,7 @@ class Waypoint_Sender(Node):
 
     def __init__(self):
         super().__init__('Waypoint_Sender')
-        self.publisher = self.create_publisher(Waypoint, 'datalink_gps', 10)
+        self.publisher = self.create_publisher(Waypoint, 'datalink_gps', qos_profile)
 
         self.declare_parameter('units', 'LTP')
         self.units = self.get_parameter('units').get_parameter_value().string_value

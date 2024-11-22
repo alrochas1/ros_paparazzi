@@ -2,6 +2,7 @@
 # TODO: Delete the txt and use something more elaborated (the Graphic API ??)
 # TODO: Maybe made the number of waypoints to send dynamic
 
+import time
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import NavSatFix
@@ -10,7 +11,7 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
 
 from pyproj import Proj, Transformer    # Library for the coordenates calc
 
-
+# Probably not needed
 qos_profile = QoSProfile(
     reliability=ReliabilityPolicy.RELIABLE,
     durability=DurabilityPolicy.TRANSIENT_LOCAL,
@@ -38,8 +39,21 @@ class Waypoint_Sender(Node):
         self.units = self.get_parameter('units').get_parameter_value().string_value
 
         # The node will send the waypoint just one time
+        time.sleep(0.5)
+        self.wait_subscribers()
         self.send_waypoint()
         self.get_logger().info("All the waypoints were sent. Shutting down")
+
+
+    def wait_subscribers(self, timeout=5):
+        elapsed_time = 0
+        while self.publisher.get_subscription_count() == 0:
+            self.get_logger().info('Waiting for subscribers...')
+            time.sleep(0.5)
+            elapsed_time += 0.5
+            if elapsed_time >= timeout:
+                self.get_logger().warning('No subscribers connected after waiting.')
+                break
 
 
     def send_waypoint(self):

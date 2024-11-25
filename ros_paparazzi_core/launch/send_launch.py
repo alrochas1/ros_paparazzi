@@ -8,7 +8,7 @@ def generate_launch_description():
         Node(
             package='ros_paparazzi_core',
             executable='send_waypoint',
-            name='waypoint_sender',
+            name='Waypoint_Sender',
             output='screen'
             # emulate_tty=True
         )

@@ -12,7 +12,7 @@ def generate_launch_description():
         Node(
             package='ros_paparazzi_core',
             executable='data_provider',
-            name='data_provider',
+            name='Data_Provider',
             output='screen',
             emulate_tty=True,
             parameters=[{'units': LaunchConfiguration('units')}]
@@ -21,7 +21,7 @@ def generate_launch_description():
         Node(
             package='ros_paparazzi_core',
             executable='telemetry',
-            name='telemetry',
+            name='Telemetry_Receiver',
             output='screen',
             emulate_tty=True
         )

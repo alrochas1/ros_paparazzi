@@ -11,8 +11,8 @@ from ros_paparazzi_interfaces.msg import Waypoint
 from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
 
 from ros_paparazzi_core.data import autopilot_data
-from ros_paparazzi_core.paparazzi_receive import PPZI_TELEMETRY, TIME_THREAD
-from ros_paparazzi_core.paparazzi_send import PPZI_DATALINK
+from ros_paparazzi_core.com.paparazzi_receive import PPZI_TELEMETRY, TIME_THREAD
+from ros_paparazzi_core.com.paparazzi_send import PPZI_DATALINK
 
 qos_profile = QoSProfile(
     reliability=ReliabilityPolicy.RELIABLE,

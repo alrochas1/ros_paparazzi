@@ -49,9 +49,10 @@ class Raspy_Publisher(Node):
     # Funcion que manda los mensajes datalink por el puerto serie cuando los recibe del topic
     def datalink_callback(self, msg):
 
-        lat = msg.position.latitude
-        lon = msg.position.longitude
-        alt = msg.position.altitude
+        # Hay que pasarlo a entero, que es lo que entiende Paparazzi
+        lat = int(msg.position.latitude)*1e+07
+        lon = int(msg.position.longitude)*1e+07
+        alt = int(msg.position.altitude)*1e+07
         wp_id = msg.wp_id
 
         self.get_logger().info(f'Receiving data: [{lat*1e-07:.7f}, {lon*1e-07:.7f}]')

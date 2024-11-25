@@ -72,14 +72,14 @@ class DataProvider(Node):
 
                 # For using the txt
                 if self.units == 'WGS84':
-                    latitude = int(self.get_value_from_line(lines, "latitude"))
-                    longitude = int(self.get_value_from_line(lines, "longitude"))
+                    latitude = float(self.get_value_from_line(lines, "latitude"))
+                    longitude = float(self.get_value_from_line(lines, "longitude"))
                 else:
                     x = self.get_value_from_line(lines, "x")
                     y = self.get_value_from_line(lines, "y")
                     latitude, longitude = ltp_to_wgs84(origin_lat, origin_lon, x, y)
-                    latitude = int(latitude * 1e7)
-                    longitude = int(longitude * 1e7)
+                    latitude = float(latitude)
+                    longitude = float(longitude)
             
                 # altitude = int(self.get_value_from_line(lines, "altitude"))
                 altitude = int(650*1e+03)

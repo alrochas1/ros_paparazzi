@@ -1,6 +1,6 @@
 # srv/GetWaypoint.srv
 ---
-int32 latitude
-int32 longitude
-int32 altitude
+float64 latitude
+float64 longitude
+float64 altitude
 uint8 wp_id

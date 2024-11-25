@@ -50,8 +50,8 @@ class Raspy_Publisher(Node):
     def datalink_callback(self, msg):
 
         # Hay que pasarlo a entero, que es lo que entiende Paparazzi
-        lat = int(msg.position.latitude)*1e+07
-        lon = int(msg.position.longitude)*1e+07
+        lat = int(msg.position.latitude*1e+07)
+        lon = int(msg.position.longitude*1e+07)
         alt = int(msg.position.altitude)
         wp_id = msg.wp_id
 

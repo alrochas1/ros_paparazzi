@@ -1,3 +1,5 @@
+import os
+from glob import glob
 from setuptools import find_packages, setup
 
 package_name = 'ros_paparazzi_core'
@@ -10,6 +12,8 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        # Include all launch files.
+        (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch.[pxy][yma]*')))
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -21,8 +25,13 @@ setup(
         'console_scripts': [
                 'computer = ros_paparazzi_core.computer_suscriber:main',
                 'raspy = ros_paparazzi_core.raspy_publisher:main',
-                'send = ros_paparazzi_core.waypoint_sender:main',
+                'send_waypoint = ros_paparazzi_core.waypoint_sender:main',
                 'telemetry = ros_paparazzi_core.telemetry_receiver:main',
+                'data_provider = ros_paparazzi_core.data_provider:main',
+        ],
+        'launch.frontend': [
+            'main_launch = ros_paparazzi_core.launch.main_launch',
+            'send_launch = ros_paparazzi_core.launch.send_launch', 
         ],
     },
 )

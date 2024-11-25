@@ -1,4 +1,4 @@
-# This node send the waypoint in the txt to the raspyimport rclpy
+# This node send the waypoint in the txt to the raspy
 # TODO: Review the service protocol (the txt logic has been moved to data_provider)
 # TODO: Maybe made the number of waypoints to send dynamic
 # TODO: Improve the way of managing the types (using float or int, not both)
@@ -47,19 +47,19 @@ class Waypoint_Sender(Node):
         try:
             response = future.result()
             msg = Waypoint()
-            msg.position.latitude = float(response.latitude)
-            msg.position.longitude = float(response.longitude)
-            msg.position.altitude = float(response.altitude)
+            msg.gps.latitude = float(response.latitude)
+            msg.gps.longitude = float(response.longitude)
+            msg.gps.altitude = float(response.altitude)
             msg.wp_id = response.wp_id
 
             if self.wait_subscribers():
                 self.publisher.publish(msg)
-                self.get_logger().info(f'Published waypoint: lat={msg.position.latitude}, lon={msg.position.longitude}')
+                self.get_logger().info(f'Published waypoint: lat={msg.gps.latitude}, lon={msg.gps.longitude}')
             
         except Exception as e:
             self.get_logger().error(f"Failed to get waypoint: {e}")
         finally:
-            self.get_logger().info("All the waypoints were sent. Shutting down")
+            self.get_logger().info("Shutting down")
             rclpy.shutdown()
 
 

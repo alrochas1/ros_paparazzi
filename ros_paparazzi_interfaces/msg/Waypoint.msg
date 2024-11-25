@@ -6,5 +6,5 @@
 
 
 # Otra opcion mas comoda es usar el mensaje NavSatFix y ampliarlo
-sensor_msgs/NavSatFix position
+sensor_msgs/NavSatFix gps
 uint8 wp_id

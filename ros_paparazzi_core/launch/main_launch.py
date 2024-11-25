@@ -25,13 +25,5 @@ def generate_launch_description():
             output='screen',
             emulate_tty=True
         )
-        
-        # Node(
-        #     package='ros_paparazzi_core',
-        #     executable='send',
-        #     name='waypoint_sender',
-        #     output='screen',
-        #     emulate_tty=True
-        #     # parameters=[{'units': LaunchConfiguration('units')}]
-        # )
+
     ])

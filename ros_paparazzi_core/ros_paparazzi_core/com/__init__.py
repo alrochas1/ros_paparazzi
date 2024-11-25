@@ -1,0 +1,1 @@
+# This folder contains the code that manages the serial comunication

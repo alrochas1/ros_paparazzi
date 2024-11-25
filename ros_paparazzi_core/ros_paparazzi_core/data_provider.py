@@ -82,7 +82,7 @@ class DataProvider(Node):
                     longitude = float(longitude)
             
                 # altitude = int(self.get_value_from_line(lines, "altitude"))
-                altitude = int(650*1e+03)
+                altitude = float(650*1e+03)
                 wp_id = int(self.get_value_from_line(lines, "waypoint_id"))
                 
                 return latitude, longitude, altitude, wp_id

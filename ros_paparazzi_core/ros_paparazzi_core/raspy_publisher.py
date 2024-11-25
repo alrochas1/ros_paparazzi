@@ -52,7 +52,7 @@ class Raspy_Publisher(Node):
         # Hay que pasarlo a entero, que es lo que entiende Paparazzi
         lat = int(msg.position.latitude)*1e+07
         lon = int(msg.position.longitude)*1e+07
-        alt = int(msg.position.altitude)*1e+07
+        alt = int(msg.position.altitude)
         wp_id = msg.wp_id
 
         self.get_logger().info(f'Receiving data: [{lat*1e-07:.7f}, {lon*1e-07:.7f}]')

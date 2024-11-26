@@ -8,10 +8,17 @@ from rclpy.node import Node
 
 from sensor_msgs.msg import NavSatFix
 from ros_paparazzi_interfaces.msg import Waypoint
+from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
 
 from ros_paparazzi_core.data import autopilot_data
-from ros_paparazzi_core.paparazzi_receive import PPZI_TELEMETRY, TIME_THREAD
-from ros_paparazzi_core.paparazzi_send import PPZI_DATALINK
+from ros_paparazzi_core.com.paparazzi_receive import PPZI_TELEMETRY, TIME_THREAD
+from ros_paparazzi_core.com.paparazzi_send import PPZI_DATALINK
+
+qos_profile = QoSProfile(
+    reliability=ReliabilityPolicy.RELIABLE,
+    durability=DurabilityPolicy.TRANSIENT_LOCAL,
+    depth=10
+)
 
 
 # Variables globales
@@ -52,9 +59,10 @@ class Raspy_Publisher(Node):
     # Funcion que manda los mensajes datalink por el puerto serie cuando los recibe del topic
     def datalink_callback(self, msg):
 
-        lat = msg.gps.latitude
-        lon = msg.gps.longitude
-        alt = msg.gps.altitude
+        # Hay que pasarlo a entero, que es lo que entiende Paparazzi
+        lat = int(msg.gps.latitude*1e+07)
+        lon = int(msg.gps.longitude*1e+07)
+        alt = int(msg.gps.altitude)
         wp_id = msg.wp_id
 
         self.get_logger().info(f'Receiving data [{wp_id}]: [{lat*1e-07:.7f}, {lon*1e-07:.7f}]')
@@ -114,6 +122,8 @@ def main(args=None):
 
     global paparazzi_send, paparazzi_receive, time_thread
     rclpy.init(args=args)
+
+    port = "/dev/serial0"
 
     # Lanza los hilos
     paparazzi_time = TIME_THREAD()

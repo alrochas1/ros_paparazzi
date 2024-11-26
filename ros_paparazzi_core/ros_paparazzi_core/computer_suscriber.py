@@ -1,7 +1,7 @@
-# This is the node that will run on the computer
+# This is the old node that was used to send and receive the data from the raspy
+# Not used
 
 import rclpy
-import random
 from rclpy.node import Node
 from sensor_msgs.msg import NavSatFix
 from ros_paparazzi_interfaces.msg import Waypoint
@@ -63,9 +63,9 @@ class Computer_Subscriber(Node):
         msg = Waypoint()
         # msg.header.stamp.sec = int(autopilot_data.tiempo)
         # msg.header.stamp.nanosec = int(1e+9*(autopilot_data.tiempo - int(autopilot_data.tiempo)))
-        msg.gps.latitude = float(lat)
-        msg.gps.longitude = float(lon)
-        msg.gps.altitude = float(alt)
+        msg.position.longitude = float(lon)
+        msg.position.latitude = float(lat)
+        msg.position.altitude = float(alt)      # Manda una altitud fija
         msg.wp_id = int(wp_id)
         self.publisher.publish(msg)
         self.get_logger().info(f'Publishing data: [{lat * 1e-7:.7f}, {lon * 1e-7:.7f}] --> WP_ID = [{wp_id}]')
@@ -119,7 +119,8 @@ class Computer_Subscriber(Node):
                     latitude = latitude * 1e7
                     longitude = longitude * 1e7
             
-                altitude = int(self.get_value_from_line(lines, "altitude"))
+                # altitude = int(self.get_value_from_line(lines, "altitude"))
+                altitude = 650*1e+03
                 wp_id = int(self.get_value_from_line(lines, "waypoint_id"))
                 
                 return latitude, longitude, altitude, wp_id

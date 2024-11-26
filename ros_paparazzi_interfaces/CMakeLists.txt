@@ -12,7 +12,9 @@ find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Waypoint.msg"
-  DEPENDENCIES sensor_msgs # Add packages that above messages depend on, in this case geometry_msgs for Sphere.msg
+  "srv/GetWaypoint.srv"
+  DEPENDENCIES sensor_msgs
+  DEPENDENCIES builtin_interfaces
 )
 
 # if(BUILD_TESTING)
@@ -27,4 +29,5 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 #   ament_lint_auto_find_test_dependencies()
 # endif()
 
+ament_export_dependencies(rosidl_default_runtime)
 ament_package()

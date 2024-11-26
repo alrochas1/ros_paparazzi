@@ -31,3 +31,13 @@ services:
     tty: true
     network_mode: host              
     privileged: true
+
+  installer:
+    image: ucm:humble-desktop
+    volumes:
+      - ~/ROS2/ros_ws:/ros_ws  # Monta el workspace
+    working_dir: /ros_ws/src/ros_paparazzi  # Establece el directorio de trabajo
+    network_mode: host
+    command: /bin/bash -c "./install.sh"  # Ejecuta el script
+    privileged: true
+    restart: "no"

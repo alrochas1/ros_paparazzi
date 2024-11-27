@@ -2,6 +2,7 @@
 
 # TEMPORAL: Connect to the Raspy and launch the node. 
 # You need to have everything configured as I do
+# TODO: Manage the case when you are not connected to the Wifi
 
 
 ROS_ROUTE=/home/ucmrospy/ROS2/ros_ws/src/ros_paparazzi

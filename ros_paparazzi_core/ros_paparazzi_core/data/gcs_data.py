@@ -18,4 +18,24 @@ class TelemetryData():
         return f"TelemetryData(longitude={self.longitude}, latitude={self.latitude}, altitude={self.altitude})"
     
 
+class WaypointData():
+    def __init__(self):
+        self.x = 0.0
+        self.y = 0.0
+        self.wp_id = 0
+
+    def update(self, x, y, wp_id):
+        self.lat = float(x)
+        self.lon = float(y)
+        self.wp_id = wp_id
+
+    def recover(self):
+        return [self.x, self.y, self.wp_id]
+
+    def __repr__(self):
+        return f"WaypointData(X={self.x}, Y={self.y}, ID = {self.wp_id})"
+
+    
+
 telemetry_data = TelemetryData()
+waypoint_data = WaypointData()

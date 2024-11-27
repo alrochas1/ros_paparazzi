@@ -6,7 +6,7 @@ def main():
 
     bokeh_app_path = os.path.join(
     os.path.dirname(__file__), 
-    "../ui/create_ui.py" 
+    "../ui/gcs_node.py" 
 )
 
 

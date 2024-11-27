@@ -6,9 +6,9 @@ from ros_paparazzi_core.data import gcs_data
 
 # telemetry_data = {'latitude': 0.0, 'longitude': 0.0, 'altitude': 0.0}
 
-class Telemetry_Subscriber(Node):
+class Telemetry_Receiver(Node):
     def __init__(self):
-        super().__init__('telemetry_subscriber')
+        super().__init__('Telemetry_Receiver')
         self.subscription = self.create_subscription(
             NavSatFix,
             'telemetry_gps',  # Nombre del topic

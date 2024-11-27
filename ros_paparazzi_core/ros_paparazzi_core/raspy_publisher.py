@@ -8,10 +8,17 @@ from rclpy.node import Node
 
 from sensor_msgs.msg import NavSatFix
 from ros_paparazzi_interfaces.msg import Waypoint
+from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
 
 from ros_paparazzi_core.data import autopilot_data
-from ros_paparazzi_core.paparazzi_receive import PPZI_TELEMETRY, TIME_THREAD
-from ros_paparazzi_core.paparazzi_send import PPZI_DATALINK
+from ros_paparazzi_core.com.paparazzi_receive import PPZI_TELEMETRY, TIME_THREAD
+from ros_paparazzi_core.com.paparazzi_send import PPZI_DATALINK
+
+qos_profile = QoSProfile(
+    reliability=ReliabilityPolicy.RELIABLE,
+    durability=DurabilityPolicy.TRANSIENT_LOCAL,
+    depth=10
+)
 
 
 # Variables globales
@@ -20,67 +27,95 @@ paparazzi_receive = None
 time_thread = None
 
 
+SR_WAYPOINT = 0x57     # W
+SR_HOME = 0X48         # H
+
+
+# PORT = "/dev/ttyUSB0"
+PORT = "/dev/serial0"
+
+
 class Raspy_Publisher(Node):
 
     def __init__(self):
         super().__init__('Raspy_Publisher')
-        self.publisher = self.create_publisher(NavSatFix, 'telemetry_gps', 10)
+        self.publisher = self.create_publisher(Waypoint, 'telemetry_gps', 10)
         self.suscriber = self.create_subscription(Waypoint, 'datalink_gps', self.datalink_callback, 10)
 
         # Crear un hilo para monitorear cambios en telemetry_data
-        self.last_telemetry_data = []
-        self.monitor_thread = threading.Thread(target=self.monitor_telemetry, daemon=True)
-        self.monitor_thread.start()
+        self.last_telemetry_data = None
+        self.last_home_data = None
+        self.start_monitor_thread(autopilot_data.telemetry_data, self.telemetry_callback, self.last_telemetry_data)
+        self.start_monitor_thread(autopilot_data.home_data, self.telemetry_callback, self.last_home_data)
 
         # Clase para mandar datos por el puerto serie (datalink)
+        self.paparazzi_send = PPZI_DATALINK(PORT)
         port = "/dev/serial0"
         #port = "/dev/ttyUSB0"
         self.paparazzi_send = PPZI_DATALINK(port)
         self.paparazzi_send.run()
-        
+
 
     # Funcion que manda los mensajes datalink por el puerto serie cuando los recibe del topic
     def datalink_callback(self, msg):
 
-        lat = msg.position.latitude
-        lon = msg.position.longitude
-        alt = msg.position.altitude
+        # Hay que pasarlo a entero, que es lo que entiende Paparazzi
+        lat = int(msg.gps.latitude*1e+07)
+        lon = int(msg.gps.longitude*1e+07)
+        alt = int(msg.gps.altitude)
         wp_id = msg.wp_id
 
-        self.get_logger().info(f'Receiving data: [{lat*1e-07:.7f}, {lon*1e-07:.7f}]')
+        self.get_logger().info(f'Receiving data [{wp_id}]: [{lat*1e-07:.7f}, {lon*1e-07:.7f}]')
         autopilot_data.waypoint_data.update(lat, lon, alt, wp_id)
-        self.paparazzi_send.send()
+        
+        if wp_id == 0: msg_type = SR_HOME
+        else: msg_type = SR_WAYPOINT
+        self.paparazzi_send.send(msg_type)
+        
 
+    # --------------------------------- FUNCIONES DE MONITOREO ---------------------------------
 
     # Funcion que publica en el topic los mensajes telemetry que recibe por el puerto serie
     def telemetry_callback(self, data):
         # data = [float(i) for i in data] # Hay que convertir los datos a Float64, que es lo que acepta NatSat
-        msg = NavSatFix()
-        msg.header.stamp.sec = int(autopilot_data.tiempo)
-        msg.header.stamp.nanosec = int(1e+9*(autopilot_data.tiempo - int(autopilot_data.tiempo)))
-        msg.longitude = float(data.longitude*1e-07)
-        msg.latitude = float(data.latitude*1e-07)
-        msg.altitude = float(data.altitude/1000.0)
+        msg = Waypoint()
+        msg.gps.header.stamp.sec = int(autopilot_data.tiempo)
+        msg.gps.header.stamp.nanosec = int(1e+9*(autopilot_data.tiempo - int(autopilot_data.tiempo)))
+        msg.gps.longitude = float(data.longitude*1e-07)
+        msg.gps.latitude = float(data.latitude*1e-07)
+        msg.gps.altitude = float(data.altitude/1000.0)
+        msg.wp_id = int(data.wp_id)
         self.publisher.publish(msg)
-        self.get_logger().info(f'Publishing data: [{msg.latitude:.7f}, {msg.longitude:.7f}, {msg.altitude:.2f}]')
+        self.get_logger().info(f'Publishing Telemetry_Data[{msg.wp_id}]: [{msg.gps.latitude:.7f}, {msg.gps.longitude:.7f}, {msg.gps.altitude:.2f}]')
 
 
-    # Hilo para monitorear cambios en telemetry_data
-    def monitor_telemetry(self):
+
+    # Función para iniciar un hilo de monitoreo genérico
+    def start_monitor_thread(self, variable, callback, last_value):
+        monitor_thread = threading.Thread(
+            target=self.monitor_variable, args=(variable, callback, last_value), daemon=True
+        )
+        monitor_thread.start()
+
+
+    # Función genérica para monitorear cambios en cualquier variable
+    def monitor_variable(self, variable, callback, last_value):
         
-        while True:
-                
-            current_data = autopilot_data.telemetry_data.recover()
-                           
-            if not self.last_telemetry_data:
-                self.last_telemetry_data = current_data
+        # last_value = self.last_telemetry_data
 
-            if current_data != self.last_telemetry_data:
-                self.last_telemetry_data = current_data
-                self.telemetry_callback(autopilot_data.telemetry_data)
+        while True:
+            current_value = variable.recover()
+            
+            if last_value is None:
+                last_value = current_value
+
+            if current_value != last_value:
+                last_value = current_value
+                callback(variable)
 
             time.sleep(0.1)
 
+    
 
 
 def main(args=None):
@@ -95,7 +130,7 @@ def main(args=None):
     time_thread = threading.Thread(target=paparazzi_time.run, args=(autopilot_data,))
     time_thread.start()
 
-    paparazzi_receive = PPZI_TELEMETRY(port)
+    paparazzi_receive = PPZI_TELEMETRY(PORT)
     receive_thread = threading.Thread(target=paparazzi_receive.run)
     receive_thread.start()
 

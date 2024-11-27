@@ -1,7 +1,7 @@
-# This is the node that will run on the computer
+# This is the old node that was used to send and receive the data from the raspy
+# Not used
 
 import rclpy
-# import random
 from rclpy.node import Node
 from sensor_msgs.msg import NavSatFix
 from ros_paparazzi_interfaces.msg import Waypoint
@@ -9,6 +9,7 @@ from ros_paparazzi_interfaces.msg import Waypoint
 from pyproj import Proj, Transformer    # Library for the coordenates calc
 
 import os # QUITAR (en un futuro)
+import time
 
 # For convert the (x,y) to (lat, lon)
 def ltp_to_wgs84(origin_lat, origin_lon, x, y):
@@ -23,22 +24,42 @@ class Computer_Subscriber(Node):
 
     def __init__(self):
         super().__init__('Computer_Suscriber')
-        self.subscription = self.create_subscription(NavSatFix, 'telemetry_gps', self.telemetry_callback, 10)
+        self.subscription = self.create_subscription(Waypoint, 'telemetry_gps', self.telemetry_callback, 10)
         self.publisher = self.create_publisher(Waypoint, 'datalink_gps', 10)
-        self.create_timer(3, self.datalink_callback)
+        # self.create_timer(3, self.datalink_callback)
+        self.timer = None
 
-        self.declare_parameter('units', 'WGS84')
+        self.declare_parameter('units', 'LTP')
         self.units = self.get_parameter('units').get_parameter_value().string_value
 
-        
-    def telemetry_callback(self, msg):
-        self.get_logger().info(f'Receiving data: [{msg.latitude:.7f}, {msg.longitude:.7f}, {msg.altitude:.2f}]')
+        # For HOME position (default)
+        self.origin_lat = None
+        self.update_HOME()
+        # self.origin_lon = None
 
+    
+    # To send the HOME request message
+    def update_HOME(self):
+
+        wp_id = 0
+        data = [0.0, 0.0, 0.0, wp_id]
+        self.send_datalink(data)    # Here the lat, lon, alt is not necesary
+        
+
+    # To send the waypoints to the AP
     def datalink_callback(self):
 
         # Temporal
-        [lat, lon, alt, wp_id] = self.get_data()
+        # [lat, lon, alt, wp_id] = self.get_data()
+        data = self.get_data()
+        self.send_datalink(data)
 
+            
+    # To publish in the datalink topic
+    def send_datalink(self, data):
+
+        [lat, lon, alt, wp_id] = data
+        
         msg = Waypoint()
         # msg.header.stamp.sec = int(autopilot_data.tiempo)
         # msg.header.stamp.nanosec = int(1e+9*(autopilot_data.tiempo - int(autopilot_data.tiempo)))
@@ -50,19 +71,35 @@ class Computer_Subscriber(Node):
         self.get_logger().info(f'Publishing data: [{lat * 1e-7:.7f}, {lon * 1e-7:.7f}] --> WP_ID = [{wp_id}]')
 
 
+    # To receive the messages from the AP
+    def telemetry_callback(self, msg):
+
+        if msg.wp_id == 0:  # If id = 0, its the GPS Telemetry
+            self.get_logger().info(f'Receiving data: [{msg.gps.latitude:.7f}, {msg.gps.longitude:.7f}, {msg.gps.altitude:.2f}]')
+        
+        elif msg.wp_id == 1:   # If id = 1, its the home coordinate
+            self.origin_lat = msg.gps.latitude
+            self.origin_lon = msg.gps.longitude
+            self.get_logger().info(f'Receiving HOME: [{msg.gps.latitude:.7f}, {msg.gps.longitude:.7f}, {msg.gps.altitude:.2f}]')
+            if self.timer == None:
+                self.timer = self.create_timer(3, self.datalink_callback)    
+            
+        else:
+            self.get_logger().info(f'ERROR. wp_id {msg.wp_id} not supported')
+
+
     # TEMPORAL: To simulate the data ------------------------------------------------------
     def get_data(self):
         try:
 
-            # Esto es una cutrez, pero me vale para probar
+            # Esto es un poco cutre, pero me vale para probar
             current_file_dir = os.path.dirname(os.path.abspath(__file__))
             workspace_dir = os.path.abspath(os.path.join(current_file_dir, "../../../../../.."))
             if self.units == 'WGS84':
                 config_file_path = os.path.join(workspace_dir, "src", "ros_paparazzi", "data_WGS.txt")
             else:
-                config_file_path = os.path.join(workspace_dir, "src", "ros_paparazzi", "data_LTP.txt")
-                origin_lat = 40.4509250
-                origin_lon = -3.7271889
+                config_file_path = os.path.join(workspace_dir, "src", "ros_paparazzi", "data_LTP.txt") 
+                
 
             with open(config_file_path, "r") as file:
                 lines = file.readlines()
@@ -78,7 +115,7 @@ class Computer_Subscriber(Node):
                 else:
                     x = self.get_value_from_line(lines, "x")
                     y = self.get_value_from_line(lines, "y")
-                    latitude, longitude = ltp_to_wgs84(origin_lat, origin_lon, x, y)
+                    latitude, longitude = ltp_to_wgs84(self.origin_lat, self.origin_lon, x, y)
                     latitude = latitude * 1e7
                     longitude = longitude * 1e7
             

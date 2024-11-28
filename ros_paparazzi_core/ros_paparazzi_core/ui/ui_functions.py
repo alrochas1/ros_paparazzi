@@ -21,12 +21,16 @@ def plot_map():
 
 def get_map(x_min, y_min, x_max, y_max):
     p = figure(title='Posición', x_range=(x_min, x_max), y_range=(y_min, y_max), x_axis_type="mercator", y_axis_type="mercator", width=600, height=500)
-    p.add_tile("CartoDB Positron")
+    p.add_tile("OSM")
     return p
+
+
 
 def wpButtonClick():
 
     Thread(target=send_waypoint, daemon=True).start()
+
+
 
 
 def coordinated_changed(coord):

@@ -22,7 +22,7 @@ def update_ui():
 # Create UI
 
 # Estos tres botones son de momento genericos, por si acaso
-button1 = Button(label='Button 1', width=100, height=40)
+home_button = Button(label='Request HOME', width=100, height=40)
 button2 = Button(label='Button 2', width=100, height=40)
 button3 = Button(label='Button 3', width=100, height=40)
 
@@ -49,15 +49,17 @@ wpButton = Button(label='Send Waypoint', width=60, height=40, button_type='succe
 wpButton.on_click(wpButtonClick)
 
 
-buttons_column = column(Spacer(height=100), button1, button2, button3, Spacer(height=100))
+buttons_column = column(Spacer(height=100), home_button, button2, button3, Spacer(height=100))
 plots = row(plot1, plot2)
-bottom_section = row(Spacer(width=100), column(v1x, v1y), column(v2x, v2y, v2z, Spacer(height=18), wpButton))
+bottom_section = row(Spacer(width=110), column(v1x, v1y), column(v2x, v2y, v2z, Spacer(height=18), wpButton))
 
 
 layout = row(
+    Spacer(width=25),
     buttons_column, 
+    Spacer(width=25),
     map_plot,
-    column(plots, Spacer(height=100), bottom_section)
+    column(plots, Spacer(height=40), bottom_section)
 )
 
 

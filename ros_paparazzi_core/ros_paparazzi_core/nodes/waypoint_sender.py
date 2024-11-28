@@ -1,3 +1,5 @@
+# TODO: Implement HOME topic
+
 import time
 from rclpy.node import Node
 
@@ -15,20 +17,12 @@ origin_lat = 40.4509250
 origin_lon = -3.7271889
 
 
-# Probably not needed
-qos_profile = QoSProfile(
-    reliability=ReliabilityPolicy.RELIABLE,
-    durability=DurabilityPolicy.TRANSIENT_LOCAL,
-    depth=10
-)
-
-
 class Waypoint_Sender(Node):
 
     def __init__(self):
         super().__init__('Waypoint_Sender')
         self.srv = self.create_service(GetWaypoint, 'get_waypoint', self.send_waypoint)
-        self.publisher = self.create_publisher(Waypoint, 'datalink_gps', qos_profile)
+        self.publisher = self.create_publisher(Waypoint, 'waypoints/datalink', 10)
         
 
     def send_waypoint(self, request, response):

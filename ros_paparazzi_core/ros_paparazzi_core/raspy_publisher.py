@@ -6,7 +6,6 @@ import time
 import rclpy
 from rclpy.node import Node
 
-from sensor_msgs.msg import NavSatFix
 from ros_paparazzi_interfaces.msg import Waypoint
 from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
 
@@ -40,7 +39,7 @@ class Raspy_Publisher(Node):
     def __init__(self):
         super().__init__('Raspy_Publisher')
         self.publisher = self.create_publisher(Waypoint, 'telemetry_gps', 10)
-        self.suscriber = self.create_subscription(Waypoint, 'datalink_gps', self.datalink_callback, 10)
+        self.suscriber = self.create_subscription(Waypoint, 'waypoints/datalink', self.datalink_callback, 10)
 
         # Crear un hilo para monitorear cambios en telemetry_data
         self.last_telemetry_data = None

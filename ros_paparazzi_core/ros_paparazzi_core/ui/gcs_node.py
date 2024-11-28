@@ -40,7 +40,7 @@ v1y = TextInput(value='Y=0.0m', width=150, height=15)
 
 v2x = TextInput(value='0.0', width=150, height=15)
 v2y = TextInput(value='0.0', width=150, height=15)
-v2z = TextInput(value='2', width=150, height=15)
+v2z = TextInput(value='0', width=150, height=15)
 v2x.on_change('value', coordinated_changed("x"))
 v2y.on_change('value', coordinated_changed("y"))
 v2z.on_change('value', coordinated_changed("wp"))

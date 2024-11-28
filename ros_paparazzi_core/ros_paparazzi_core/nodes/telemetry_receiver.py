@@ -18,17 +18,17 @@ class Telemetry_Receiver(Node):
         if msg.wp_id == 1:
             self.update_home(msg)
         elif msg.wp_id == 0:
-            gcs_data.telemetry_data.update(msg.latitude, msg.longitude, msg.altitude)
+            gcs_data.telemetry_data.update(msg.gps.latitude, msg.gps.longitude, msg.gps.altitude)
         
 
-    def update_home(self, gps):
+    def update_home(self, msg):
 
-        msg = NavSatFix()
-        msg.latitude = gps.latitude
-        msg.longitude = gps.longitude
-        msg.altitude = gps.altitude
+        home = NavSatFix()
+        home.latitude = msg.gps.latitude
+        home.longitude = msg.gps.longitude
+        home.altitude = msg.gps.altitude
 
-        self.publisher.publish(msg)
+        self.publisher.publish(home)
 
 
 

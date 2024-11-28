@@ -27,15 +27,15 @@ git clone {REPOSITORY}
 For an easy install, a `./install.sh` is included (you can also use colcon to build the package).
 
 
-## Running the Nodes
+## Running the Nodes (OUTDATED)
 
 At the moment there are four nodes:
 - **raspy_publisher**: Manage the serial communication with the AP
-- **waypoint_sender**: Send the waypoint (currently from the txt) to the raspberry
+- **waypoint_servicer**: Send the waypoint to the raspberry
 - **telemetry**: Receive the telemetry GPS info
 - **data_provider**: Provide the data from the txt (temporal)
 
-![Nodes Diagram](rosgraph2.png)
+![Nodes Diagram](rosgraph3.png)
 
 <!-- At the moment there are two nodes that can be runned. -->
 

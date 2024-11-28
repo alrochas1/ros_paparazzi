@@ -42,3 +42,5 @@ class WaypointData():
 
 telemetry_data = TelemetryData()
 waypoint_data = WaypointData()
+
+origin = [40.4509250, -3.7271889, 650]

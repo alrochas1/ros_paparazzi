@@ -39,7 +39,7 @@ class Raspy_Publisher(Node):
     def __init__(self):
         super().__init__('Raspy_Publisher')
         self.publisher = self.create_publisher(Waypoint, 'telemetry_gps', 10)
-        self.suscriber = self.create_subscription(Waypoint, 'waypoints/datalink', self.datalink_callback, 10)
+        self.suscriber = self.create_subscription(Waypoint, 'waypoints/datalink', self.waypoint_callback, 10)
 
         # Crear un hilo para monitorear cambios en telemetry_data
         self.last_telemetry_data = None
@@ -56,7 +56,7 @@ class Raspy_Publisher(Node):
 
 
     # Funcion que manda los mensajes datalink por el puerto serie cuando los recibe del topic
-    def datalink_callback(self, msg):
+    def waypoint_callback(self, msg):
 
         # Hay que pasarlo a entero, que es lo que entiende Paparazzi
         lat = int(msg.gps.latitude*1e+07)

@@ -1,6 +1,6 @@
 # Auxiliar functions for transform GPS Coordinates
 
-from pyproj import Proj, Transformer    # Library for the coordenates calc
+from pyproj import Proj, Transformer, CRS    # Library for the coordenates calc
 
 def ltp_to_wgs84(origin_lat, origin_lon, x, y):
     source_proj = f"+proj=ortho +lat_0={origin_lat} +lon_0={origin_lon}"
@@ -8,3 +8,10 @@ def ltp_to_wgs84(origin_lat, origin_lon, x, y):
 
     lon, lat = transformer.transform(x, y)
     return lat, lon
+
+
+def wgs84_to_epsg(lat, lon):
+    crs = CRS.from_epsg(3857)
+    transformer = Transformer.from_crs(crs.geodetic_crs, crs)
+
+    return transformer.transform(lat, lon)

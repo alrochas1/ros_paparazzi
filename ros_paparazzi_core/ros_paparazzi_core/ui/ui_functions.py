@@ -1,7 +1,7 @@
 from threading import Thread
 
 from ros_paparazzi_core.data import gcs_data
-from ros_paparazzi_core.ui.ros_nodes import send_waypoint
+from ros_paparazzi_core.ui.ros_nodes import send_waypoint, request_home
 
 from bokeh.plotting import figure
 
@@ -26,10 +26,14 @@ def get_map(x_min, y_min, x_max, y_max):
 
 
 
-def wpButtonClick():
+def wpButton_Click():
 
     Thread(target=send_waypoint, daemon=True).start()
 
+
+def home_button_Click():
+
+    Thread(target=request_home, daemon=True).start()
 
 
 

@@ -3,26 +3,30 @@
 import time
 from rclpy.node import Node
 
-# from sensor_msgs.msg import NavSatFix
 from ros_paparazzi_interfaces.msg import Waypoint
 from ros_paparazzi_interfaces.srv import GetWaypoint
+from sensor_msgs.msg import NavSatFix
 
 from ros_paparazzi_core.aux.geo_tools import ltp_to_wgs84
-
-from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
+from ros_paparazzi_core.data import gcs_data
 
 
 # TEMPORAL
-origin_lat = 40.4509250
-origin_lon = -3.7271889
+# origin_lat = 40.4509250
+# origin_lon = -3.7271889
 
 
-class Waypoint_Sender(Node):
+class Waypoint_Service(Node):
 
     def __init__(self):
-        super().__init__('Waypoint_Sender')
+        super().__init__('Waypoint_Service')
         self.srv = self.create_service(GetWaypoint, 'get_waypoint', self.send_waypoint)
         self.publisher = self.create_publisher(Waypoint, 'waypoints/datalink', 10)
+        self.suscriber = self.create_subscription(NavSatFix, 'waypoints/home', self.home_callback, 10)
+
+
+    def home_callback(self, msg):
+        gcs_data.origin =  [msg.latitude, msg.longitude, msg.altitude]
         
 
     def send_waypoint(self, request, response):
@@ -35,13 +39,16 @@ class Waypoint_Sender(Node):
         response.ack = False
 
         try:
-            [latitude, longitude] = ltp_to_wgs84(origin_lat, origin_lon, x, y)
 
             msg = Waypoint()
-            msg.gps.latitude = float(latitude)
-            msg.gps.longitude = float(longitude)
-            msg.gps.altitude = float(650000)
             msg.wp_id = wp_id
+
+            if wp_id != 0:
+                [latitude, longitude] = ltp_to_wgs84(gcs_data.origin[0], gcs_data.origin[1], x, y)
+                msg.gps.latitude = float(latitude)
+                msg.gps.longitude = float(longitude)
+                msg.gps.altitude = float(650000)
+                
 
             if self.wait_subscribers():
                 self.publisher.publish(msg)
@@ -66,15 +73,3 @@ class Waypoint_Sender(Node):
                 return False
         return True
 
-    # ------------------------------------------------------------------------------------------
-
-
-# def main(args=None):
-
-#     rclpy.init(args=args)
-#     node = Waypoint_Sender()
-#     rclpy.spin(node)
-
-
-# if __name__ == '__main__':
-#     main()

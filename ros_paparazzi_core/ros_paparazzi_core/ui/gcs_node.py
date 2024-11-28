@@ -4,12 +4,12 @@ import rclpy
 
 from ros_paparazzi_core.data import gcs_data
 from ros_paparazzi_core.ui.ros_nodes import start_nodes
-from ros_paparazzi_core.ui.ui_functions import coordinated_changed, wpButtonClick, plot_map
+from ros_paparazzi_core.ui.ui_functions import coordinated_changed, wpButton_Click, home_button_Click, plot_map
+from ros_paparazzi_core.aux.geo_tools import wgs84_to_epsg
 
 from bokeh.layouts import column, row, Spacer
-from bokeh.models import TextInput, Button
-from bokeh.plotting import figure
-from bokeh.plotting import curdoc
+from bokeh.models import TextInput, Button, ColumnDataSource
+from bokeh.plotting import figure, curdoc
 
 
 def update_ui():
@@ -17,16 +17,21 @@ def update_ui():
     v1x.value = f"Latitude={latitude:.4f}"
     v1y.value = f"Longitude={longitude:.4f}"
 
+    [x, y] = wgs84_to_epsg(gcs_data.origin[0], gcs_data.origin[1])
+    source.data = dict(x=[x], y=[y])
 
 
 # Create UI
 
 # Estos tres botones son de momento genericos, por si acaso
 home_button = Button(label='Request HOME', width=100, height=40)
+home_button.on_click(home_button_Click)
 button2 = Button(label='Button 2', width=100, height=40)
 button3 = Button(label='Button 3', width=100, height=40)
 
 map_plot = plot_map()
+source = ColumnDataSource(data=dict(x=[gcs_data.origin[0]], y=[gcs_data.origin[1]]))
+map_plot.circle(x="x", y="y", size=12, fill_color="red", source=source)
 
 # Dos plots por si acaso tambien
 plot1 = figure(width=270, height=300, title="Plot 1")
@@ -46,7 +51,7 @@ v2y.on_change('value', coordinated_changed("y"))
 v2z.on_change('value', coordinated_changed("wp"))
 
 wpButton = Button(label='Send Waypoint', width=60, height=40, button_type='success')
-wpButton.on_click(wpButtonClick)
+wpButton.on_click(wpButton_Click)
 
 
 buttons_column = column(Spacer(height=100), home_button, button2, button3, Spacer(height=100))

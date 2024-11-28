@@ -29,6 +29,7 @@ class Telemetry_Receiver(Node):
         home.altitude = msg.gps.altitude
 
         self.publisher.publish(home)
+        self.get_logger().info(f'Home Updated: lat={home.latitude}, lon={home.longitude}')
 
 
 

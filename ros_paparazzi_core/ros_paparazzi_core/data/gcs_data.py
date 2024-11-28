@@ -25,9 +25,12 @@ class WaypointData():
         self.wp_id = 0
 
     def update(self, x, y, wp_id):
-        self.lat = float(x)
-        self.lon = float(y)
-        self.wp_id = wp_id
+        if x is not None:
+            self.x = float(x)
+        if y is not None:
+            self.y = float(y)
+        if wp_id is not None:
+            self.wp_id = wp_id
 
     def recover(self):
         return [self.x, self.y, self.wp_id]

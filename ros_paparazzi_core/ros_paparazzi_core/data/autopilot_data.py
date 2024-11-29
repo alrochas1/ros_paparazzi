@@ -42,6 +42,26 @@ class WaypointData():
 
     def __repr__(self):
         return f"WaypointData(Latitud={self.lat}, Longitud={self.lon}, Altitud={self.alt}, ID = {self.wp_id})"
+    
+
+class IMU_Data():
+    def __init__(self):
+        self.x = 0
+        self.y = 0
+        self.z = 0
+        self.time = 0.0
+
+    def update(self, time, x, y, z):
+        self.x = int(x)
+        self.y = int(y)
+        self.z = int(z)
+        self.time = time
+
+    def recover(self):
+        return [self.x, self.y, self.z]
+
+    def __repr__(self):
+        return f"IMU Data(x={self.x}, y={self.y}, z={self.z})"
 
     
 
@@ -50,11 +70,5 @@ tiempo = 0
 telemetry_data = TelemetryData()    # For the telemetry GPS message
 waypoint_data = WaypointData()      # For sending Waypoints to the AP
 home_data = TelemetryData()         # For sending the HOME position to the computer
-
-
-
-
-
-    
-
+imu_data = IMU_Data()
 

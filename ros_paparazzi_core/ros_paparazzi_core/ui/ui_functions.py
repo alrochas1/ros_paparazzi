@@ -6,6 +6,7 @@ from ros_paparazzi_core.ui.ros_nodes import send_waypoint, request_home
 from bokeh.plotting import figure
 
 from pyproj import Transformer, CRS
+from paramiko import SSHClient, AutoAddPolicy
 
 
 P0_SANTILLANA = (40.706421, -3.87)
@@ -34,6 +35,36 @@ def wpButton_Click():
 def home_button_Click():
 
     Thread(target=request_home, daemon=True).start()
+
+
+# # Raspy config
+# SSH_HOST = "raspy_wifi"
+# SSH_USER = "ucmrospy"
+# SSH_ROUTE = "/home/ucmrospy/ROS2/ros_ws/src/ros_paparazzi"
+# SSH_PRIVATE_KEY_PATH = "~/.ssh/id_ed25519"
+
+# def raspy_button_Click():
+#     try: 
+#         client = SSHClient()
+#         client.set_missing_host_key_policy(AutoAddPolicy())
+#         client.connect(SSH_HOST, username=SSH_USER, key_filename=SSH_PRIVATE_KEY_PATH)
+
+#         command = f"""
+#         cd {SSH_ROUTE}
+#         docker compose up raspy
+#         """
+#         stdin, stdout, stderr = client.exec_command(command)
+
+#         # print(stdout.read().decode())
+#         # print(stderr.read().decode())
+
+#         client.close()
+#         gcs_data.raspy_status = True
+
+#         print("Nodo lanzado en la Raspberry.")
+#     except Exception as e:
+#         gcs_data.raspy_status = False
+#         print(f"Error al lanzar el nodo: {e}")
 
 
 

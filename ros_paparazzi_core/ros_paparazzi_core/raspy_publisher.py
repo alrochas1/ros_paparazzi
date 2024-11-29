@@ -44,14 +44,13 @@ class Raspy_Publisher(Node):
         # Crear un hilo para monitorear cambios en telemetry_data
         self.last_telemetry_data = None
         self.last_home_data = None
+        self.last_imu_data = None
         self.start_monitor_thread(autopilot_data.telemetry_data, self.telemetry_callback, self.last_telemetry_data)
         self.start_monitor_thread(autopilot_data.home_data, self.telemetry_callback, self.last_home_data)
+        self.start_monitor_thread(autopilot_data.imu_data, self.imu_callback, self.last_imu_data)
 
         # Clase para mandar datos por el puerto serie (datalink)
         self.paparazzi_send = PPZI_DATALINK(PORT)
-        port = "/dev/serial0"
-        #port = "/dev/ttyUSB0"
-        self.paparazzi_send = PPZI_DATALINK(port)
         self.paparazzi_send.run()
 
 
@@ -86,6 +85,10 @@ class Raspy_Publisher(Node):
         msg.wp_id = int(data.wp_id)
         self.publisher.publish(msg)
         self.get_logger().info(f'Publishing Telemetry_Data[{msg.wp_id}]: [{msg.gps.latitude:.7f}, {msg.gps.longitude:.7f}, {msg.gps.altitude:.2f}]')
+
+
+    def imu_callback(self, data):
+        print("Comprobando que llega hasta aqui bien")
 
 
 

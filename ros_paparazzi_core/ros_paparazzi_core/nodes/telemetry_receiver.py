@@ -1,5 +1,3 @@
-# TODO: Change the topics to waypoint
-
 from rclpy.node import Node
 from sensor_msgs.msg import NavSatFix
 from ros_paparazzi_interfaces.msg import Waypoint

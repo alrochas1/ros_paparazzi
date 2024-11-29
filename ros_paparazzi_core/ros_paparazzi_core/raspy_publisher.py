@@ -7,6 +7,7 @@ import rclpy
 from rclpy.node import Node
 
 from ros_paparazzi_interfaces.msg import Waypoint
+from geometry_msgs.msg import Vector3
 
 from ros_paparazzi_core.data import autopilot_data
 from ros_paparazzi_core.com.paparazzi_receive import PPZI_TELEMETRY, TIME_THREAD
@@ -31,8 +32,9 @@ class Raspy_Publisher(Node):
 
     def __init__(self):
         super().__init__('Raspy_Publisher')
-        self.publisher = self.create_publisher(Waypoint, 'telemetry_gps', 10)
+        self.publisher = self.create_publisher(Waypoint, 'telemetry_gps', 10)   #TODO: Change the name of this 
         self.suscriber = self.create_subscription(Waypoint, 'waypoints/datalink', self.waypoint_callback, 10)
+        self.IMU_publisher = self.create_publisher(Vector3, 'sensors/imu', 10)
 
         # Crear un hilo para monitorear cambios en telemetry_data
         self.last_telemetry_data = None
@@ -81,7 +83,15 @@ class Raspy_Publisher(Node):
 
 
     def imu_callback(self, data):
-        print("Comprobando que llega hasta aqui bien")
+
+        msg = Vector3()
+        msg.x = data.x
+        msg.y = data.y
+        msg.z = data.z
+
+        self.IMU_publisher.publish(msg)
+        self.get_logger().info(f'Publishing IMU_Data: [{msg.x}, {msg.y}, {msg.z}]')
+        
 
 
 

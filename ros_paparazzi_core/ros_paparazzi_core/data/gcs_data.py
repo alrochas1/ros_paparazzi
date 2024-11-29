@@ -42,6 +42,8 @@ class WaypointData():
 
 telemetry_data = TelemetryData()
 waypoint_data = WaypointData()
+imu_data = [0, 0, 0]
+time = 0.0
 
 origin = [40.4509250, -3.7271889, 650]
 raspy_status = False

@@ -294,7 +294,7 @@ class PPZI_TELEMETRY(threading.Thread):
                     hex_z = [datappzz[18], datappzz[17], datappzz[16], datappzz[15]]
                     accel_z = calculate_signo(sign_z) * serial_byteToint(hex_z, 3)
 
-                    autopilot_data.imu_data.update(autopilot_data.tiempo, accel_x, accel_y, accel_z, 1)
+                    autopilot_data.imu_data.update(autopilot_data.tiempo, accel_x, accel_y, accel_z)
                     print(f"([PPZI_RECEIVE] - {autopilot_data.imu_data}")
 
 

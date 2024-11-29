@@ -12,7 +12,8 @@ PPZ_START_BYTE = 0x50  # "P"
 COM_START_BYTE = 0x52  # "R"
 PPZ_SONAR_BYTE = 0x53  # "S"
 PPZ_TELEMETRY_BYTE = 0x54  # "T"
-PPZ_HOME_BYTE = 0x48; # "H"
+PPZ_HOME_BYTE = 0x48 # "H"
+PPZ_IMU_BYTE = 0x49  # "I"
 PPZ_MEASURE_BYTE = 0x4D  # "M"
 COM_FINAL_BYTE = 0x46  # "F"
 COM_ANSWER_BYTE = 0x4F  # "O"
@@ -264,6 +265,37 @@ class PPZI_TELEMETRY(threading.Thread):
                     # autopilot_data.telemetry_data = [longitud, latitud, altitud, d_sonar, c_sonar]  # TERMINAR
                     autopilot_data.home_data.update(autopilot_data.tiempo, longitud, latitud, altitud, 1)
                     print(f"([PPZI_RECEIVE] - Nueva posición de HOME: {autopilot_data.home_data}")
+
+
+
+                if datappzz[1] == PPZ_IMU_BYTE:
+                    if len(datappzz) != 21:
+                        print(f"[PPZI_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 21, Received {len(datappzz)}")
+                        time.sleep(1)
+                        continue
+
+                    hex_checksumppzz = [datappzz[20], datappzz[19]]
+                    checksumppzz = serial_byteToint(hex_checksumppzz, 2)
+
+                    if not compare_checksum(datappzz, checksumppzz, data_av):
+                        print("[PPZI_RECEIVE] - Checksum erróneo.")
+                        time.sleep(1)
+                        continue
+
+                    sign_x = datappzz[4]
+                    hex_x = [datappzz[8], datappzz[7], datappzz[6], datappzz[5]]
+                    accel_x = calculate_signo(sign_x) * serial_byteToint(hex_x, 4)
+
+                    sign_y = datappzz[9]
+                    hex_y = [datappzz[13], datappzz[12], datappzz[11], datappzz[10]]
+                    accel_y = calculate_signo(sign_y) * serial_byteToint(hex_y, 4)
+
+                    sign_z = datappzz[14]
+                    hex_z = [datappzz[18], datappzz[17], datappzz[16], datappzz[15]]
+                    accel_z = calculate_signo(sign_z) * serial_byteToint(hex_z, 3)
+
+                    autopilot_data.imu_data.update(autopilot_data.tiempo, accel_x, accel_y, accel_z, 1)
+                    print(f"([PPZI_RECEIVE] - {autopilot_data.imu_data}")
 
 
             time.sleep(1)

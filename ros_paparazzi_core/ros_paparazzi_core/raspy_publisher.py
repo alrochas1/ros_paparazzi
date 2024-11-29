@@ -85,9 +85,9 @@ class Raspy_Publisher(Node):
     def imu_callback(self, data):
 
         msg = Vector3()
-        msg.x = data.x
-        msg.y = data.y
-        msg.z = data.z
+        msg.x = float(data.x)
+        msg.y = float(data.y)
+        msg.z = float(data.z)
 
         self.IMU_publisher.publish(msg)
         self.get_logger().info(f'Publishing IMU_Data: [{msg.x}, {msg.y}, {msg.z}]')

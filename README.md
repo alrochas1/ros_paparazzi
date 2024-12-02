@@ -27,32 +27,24 @@ git clone {REPOSITORY}
 For an easy install, a `./install.sh` is included (you can also use colcon to build the package).
 
 
-## Running the Nodes (OUTDATED)
+## Running the Nodes
 
 At the moment there are four nodes:
-- **raspy_publisher**: Manage the serial communication with the AP
-- **waypoint_servicer**: Send the waypoint to the raspberry
-- **telemetry**: Receive the telemetry GPS info
-- **data_provider**: Provide the data from the txt (temporal)
+- **Raspy_Publisher**: Manage the serial communication with the AP
+- **Waypoint_Service**: Send the waypoint to the raspberry
+- **Telemetry_Receiver**: Receive the telemetry info (currently position and IMU)
+- **X_Button**: Multiple Nodes to respond to the buttons of the UI
 
 ![Nodes Diagram](rosgraph3.png)
 
-<!-- At the moment there are two nodes that can be runned. -->
-
-<!-- ![Nodes Diagram](rosgraph.png)
-
-
-For lauching the node in the Raspberry, run (inside a docker):
-
+In your computer, launch the UI with
 ```
-ros2 run ros_paparazzi_core raspy
+ros2 run ros_paparazzi_core bokeh_serve
 ```
 
-And in your computer, run:
+For launching the node in the raspberry, a script `launch_ros_node.sh` is provided.
 
-```
-ros2 run ros_paparazzi_core computer -->
-
+<!--  
 Launch files are provided to make running the nodes easier.
 Use `main_launch.py` for launching the nodes that will run indefinitely
 
@@ -64,14 +56,18 @@ Use `send_launch.py` to send a waypoint to the autopilot
 
 ```
 ros2 launch ros_paparazzi_core send_launch.py
-```
+``` -->
 
-For launching the node in the raspberry, a script `launch_ros_node.sh` is provided.
-
-If you have everything connected, you should see the waypoint defined in the `data_LTP.txt` move
+<!-- TODO: Add the ROS argument instructions -->
 
 
-TODO: Add the ROS argument instructions
+## The UI
+
+Currently, there are two working buttons
+- The Send Waypoint button will send the waypoint coordinates indicated above itself.
+- The Request HOME will reset the coordinates origin
+- The Connect Raspberry will launch the node in the Raspberry (not working)
+
 
 
 

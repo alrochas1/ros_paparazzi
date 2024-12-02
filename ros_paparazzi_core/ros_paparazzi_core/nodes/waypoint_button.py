@@ -19,14 +19,3 @@ class Waypoint_Button(Node):
         request = GetWaypoint.Request()
         [request.x, request.y, request.wp_id] = gcs_data.waypoint_data.recover()
         return self.client.call_async(request)
-        # future.add_done_callback(self.handle_response)
-
-
-    # Response from the service
-    def handle_response(self, future):
-        # response = future.result()
-        # if response.ack:
-        #     print("OK")
-        # else:
-        #     print("Error")
-        print("Test")

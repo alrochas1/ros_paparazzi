@@ -4,7 +4,7 @@ import rclpy
 
 from ros_paparazzi_core.data import gcs_data
 from ros_paparazzi_core.ui.ros_nodes import start_nodes
-from ros_paparazzi_core.ui.ui_functions import coordinated_changed, wpButton_Click, home_button_Click, plot_map
+from ros_paparazzi_core.ui.ui_functions import coordinated_changed, wpButton_Click, home_button_Click, plot_map, raspy_button_Click
 from ros_paparazzi_core.aux.geo_tools import wgs84_to_epsg
 
 from bokeh.layouts import column, row, Spacer, gridplot

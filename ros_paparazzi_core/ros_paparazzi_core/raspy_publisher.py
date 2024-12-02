@@ -32,7 +32,7 @@ class Raspy_Publisher(Node):
 
     def __init__(self):
         super().__init__('Raspy_Publisher')
-        self.publisher = self.create_publisher(Waypoint, 'telemetry_gps', 10)   #TODO: Change the name of this 
+        self.publisher = self.create_publisher(Waypoint, 'waypoints/telemetry_gps', 10)   #TODO: Change the name of this 
         self.suscriber = self.create_subscription(Waypoint, 'waypoints/datalink', self.waypoint_callback, 10)
         self.IMU_publisher = self.create_publisher(Vector3, 'sensors/imu', 10)
 

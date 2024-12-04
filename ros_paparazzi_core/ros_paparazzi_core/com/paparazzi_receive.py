@@ -15,6 +15,7 @@ PPZ_TELEMETRY_BYTE = 0x54  # "T"
 PPZ_HOME_BYTE = 0x48 # "H"
 PPZ_IMU_BYTE = 0x49  # "I"
 PPZ_MEASURE_BYTE = 0x4D  # "M"
+PPZ_GPS_BYTE = 0x47  # "G"
 COM_FINAL_BYTE = 0x46  # "F"
 COM_ANSWER_BYTE = 0x4F  # "O"
 COM_NO_MEASURE_BYTE = 0x4E  # "N"
@@ -296,6 +297,34 @@ class PPZI_TELEMETRY(threading.Thread):
 
                     autopilot_data.imu_data.update(autopilot_data.tiempo, accel_x, accel_y, accel_z)
                     print(f"([PPZI_RECEIVE] - {autopilot_data.imu_data}")
+
+                
+                if datappzz[1] == PPZ_GPS_BYTE:
+                    if len(datappzz) != 20:
+                        print(f"[PPZG_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 20, Received {len(datappzz)}")
+                        time.sleep(1)
+                        continue
+
+                    hex_checksumppzz = [datappzz[19], datappzz[18]]
+                    checksumppzz = serial_byteToint(hex_checksumppzz, 2)
+
+                    if not compare_checksum(datappzz, checksumppzz, data_av):
+                        print("[PPZG_RECEIVE] - Checksum erróneo.")
+                        time.sleep(1)
+                        continue
+
+                    hex_lat = [datappzz[8], datappzz[7], datappzz[6], datappzz[5], datappzz[4]]
+                    gps_lat = serial_byteToint(hex_lat, 5)
+
+                    hex_lon = [datappzz[13], datappzz[12], datappzz[11], datappzz[10], datappzz[9]]
+                    gps_lon = serial_byteToint(hex_lon, 5)
+
+                    hex_alt = [datappzz[17], datappzz[16], datappzz[15], datappzz[14]]
+                    gps_alt = serial_byteToint(hex_alt, 4)
+
+                    autopilot_data.gps_data.update(gps_lat, gps_lon, gps_alt)
+                    print(f"[PPZG_RECEIVE] - GPS Data: Lat:{gps_lat}, Lon:{gps_lon}, Alt:{gps_alt}")
+
 
 
             time.sleep(1)

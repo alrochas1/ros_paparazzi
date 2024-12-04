@@ -78,6 +78,7 @@ usv_state = USV_State()
 terminal_data = TerminalData()
 
 imu_data = [0, 0, 0]
+gps_data = [0, 0]
 time = 0.0
 
 origin = [40.4509250, -3.7271889, 650]

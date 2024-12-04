@@ -8,6 +8,7 @@ from rclpy.node import Node
 
 from ros_paparazzi_interfaces.msg import Waypoint
 from geometry_msgs.msg import Vector3
+from sensor_msgs.msg import NavSatFix
 
 from ros_paparazzi_core.data import autopilot_data
 from ros_paparazzi_core.com.paparazzi_receive import PPZI_TELEMETRY, TIME_THREAD
@@ -32,22 +33,27 @@ class Raspy_Publisher(Node):
 
     def __init__(self):
         super().__init__('Raspy_Publisher')
-        self.publisher = self.create_publisher(Waypoint, 'waypoints/telemetry_gps', 10)   #TODO: Change the name of this 
+        self.telemetry_publisher = self.create_publisher(Waypoint, 'waypoints/telemetry_gps', 10)
         self.suscriber = self.create_subscription(Waypoint, 'waypoints/datalink', self.waypoint_callback, 10)
         self.IMU_publisher = self.create_publisher(Vector3, 'sensors/imu', 10)
+        self.GPS_publisher = self.create_publisher(NavSatFix, 'sensors/gps', 10)
 
-        # Crear un hilo para monitorear cambios en telemetry_data
-        self.last_telemetry_data = None
-        self.last_home_data = None
-        self.last_imu_data = None
-        self.start_monitor_thread(autopilot_data.telemetry_data, self.telemetry_callback, self.last_telemetry_data)
-        self.start_monitor_thread(autopilot_data.home_data, self.telemetry_callback, self.last_home_data)
-        self.start_monitor_thread(autopilot_data.imu_data, self.imu_callback, self.last_imu_data)
-
+        self.create_monitor_threads()
+        
         # Clase para mandar datos por el puerto serie (datalink)
         self.paparazzi_send = PPZI_DATALINK(PORT)
         self.paparazzi_send.run()
 
+
+    def create_monitor_threads(self):    
+        self.last_telemetry_data = None
+        self.last_home_data = None
+        self.last_imu_data = None
+        self.last_gps_data = None
+        self.start_monitor_thread(autopilot_data.telemetry_data, self.telemetry_callback, self.last_telemetry_data)
+        self.start_monitor_thread(autopilot_data.home_data, self.telemetry_callback, self.last_home_data)
+        self.start_monitor_thread(autopilot_data.imu_data, self.imu_callback, self.last_imu_data)
+        self.start_monitor_thread(autopilot_data.gps_data, self.gps_callback, self.last_gps_data)
 
     # Funcion que manda los mensajes datalink por el puerto serie cuando los recibe del topic
     def waypoint_callback(self, msg):
@@ -78,7 +84,7 @@ class Raspy_Publisher(Node):
         msg.gps.latitude = float(data.latitude*1e-07)
         msg.gps.altitude = float(data.altitude/1000.0)
         msg.wp_id = int(data.wp_id)
-        self.publisher.publish(msg)
+        self.telemetry_publisher.publish(msg)
         self.get_logger().info(f'Publishing Telemetry_Data[{msg.wp_id}]: [{msg.gps.latitude:.7f}, {msg.gps.longitude:.7f}, {msg.gps.altitude:.2f}]')
 
 
@@ -91,6 +97,17 @@ class Raspy_Publisher(Node):
 
         self.IMU_publisher.publish(msg)
         self.get_logger().info(f'Publishing IMU_Data: [{msg.x}, {msg.y}, {msg.z}]')
+
+
+    def gps_callback(self, data):
+
+        msg = NavSatFix()
+        msg.longitude = float(data.lon*1e-07)
+        msg.latitude = float(data.lat*1e-07)
+        msg.altitude = float(data.alt*1e-07)
+
+        self.GPS_publisher.publish(msg)
+        self.get_logger().info(f'Publishing GPS_Data: [{msg.latitude}, {msg.longitude}]')
         
 
 
@@ -127,8 +144,6 @@ def main(args=None):
 
     global paparazzi_send, paparazzi_receive, time_thread
     rclpy.init(args=args)
-
-    port = "/dev/serial0"
 
     # Lanza los hilos
     paparazzi_time = TIME_THREAD()

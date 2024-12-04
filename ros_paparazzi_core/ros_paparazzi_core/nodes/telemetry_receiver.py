@@ -10,8 +10,9 @@ from ros_paparazzi_core.data import gcs_data
 class Telemetry_Receiver(Node):
     def __init__(self):
         super().__init__('Telemetry_Receiver')
-        self.subscription = self.create_subscription(Waypoint, 'waypoints/telemetry_gps', self.telemetry_callback, 10)  #TODO: Change the name of this 
+        self.telemetry_subscription = self.create_subscription(Waypoint, 'waypoints/telemetry_gps', self.telemetry_callback, 10)
         self.IMU_subscription = self.create_subscription(Vector3, 'sensors/imu', self.imu_callback, 10)
+        self.GPS_subscription = self.create_subscription(NavSatFix, 'sensors/gps', self.gps_callback, 10)
         self.publisher = self.create_publisher(NavSatFix, 'waypoints/home', 10)
 
     def telemetry_callback(self, msg):
@@ -23,6 +24,9 @@ class Telemetry_Receiver(Node):
 
     def imu_callback(self, msg):
         gcs_data.imu_data = [msg.x/1024, msg.y/1024, msg.z/1024]
+
+    def gps_callback(self, msg):
+        gcs_data.gps_data = [msg.latitude, msg.longitude]
 
     def update_home(self, msg):
 

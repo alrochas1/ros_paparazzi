@@ -3,26 +3,27 @@ from threading import Thread
 
 from ros_paparazzi_core.data import gcs_data
 from ros_paparazzi_core.ui.ros_nodes import send_waypoint, request_home
+from ros_paparazzi_core.aux.geo_tools import wgs84_to_epsg 
 
 from bokeh.plotting import figure
 
-from pyproj import Transformer, CRS
 from paramiko import SSHClient, AutoAddPolicy
 
 
 P0_SANTILLANA = (40.706421, -3.87)
 P0_UCM = (40.449912, -3.730109)
-crs = CRS.from_epsg(3857)
-transformer = Transformer.from_crs(crs.geodetic_crs, crs)
+
 
 def plot_map():
-    (x_min, y_min) = transformer.transform(*P0_UCM)
+    coordinates = P0_UCM
+    (x_min, y_min) = wgs84_to_epsg(coordinates[0], coordinates[1])
     (x_max, y_max) = (x_min + 500, y_min + 500)
     p = get_map(x_min, y_min, x_max, y_max)
     return p
 
 def get_map(x_min, y_min, x_max, y_max):
-    p = figure(title='Posición', x_range=(x_min, x_max), y_range=(y_min, y_max), x_axis_type="mercator", y_axis_type="mercator", width=600, height=500)
+    p = figure(title='Posición', x_range=(x_min, x_max), y_range=(y_min, y_max), x_axis_type="mercator",
+                y_axis_type="mercator", width=600, height=500)
     p.add_tile("OSM")
     return p
 
@@ -36,37 +37,6 @@ def wpButton_Click():
 def home_button_Click():
 
     Thread(target=request_home, daemon=True).start()
-
-
-# Raspy config
-SSH_HOST = "192.168.129.43"
-SSH_USER = "ucmrospy"
-SSH_ROUTE = "/home/ucmrospy/ROS2/ros_ws/src/ros_paparazzi"
-SSH_PRIVATE_KEY_PATH = os.path.expanduser("~/.ssh/id_ed25519")
-
-def raspy_button_Click():
-    try: 
-        client = SSHClient()
-        client.set_missing_host_key_policy(AutoAddPolicy())
-        client.connect(SSH_HOST, username=SSH_USER, key_filename=SSH_PRIVATE_KEY_PATH)
-
-        command = f"""
-        cd {SSH_ROUTE}
-        docker compose up raspy &
-        """
-        stdin, stdout, stderr = client.exec_command(command)
-
-        # print(stdout.read().decode())
-        # print(stderr.read().decode())
-
-        client.close()
-        gcs_data.raspy_status = True
-
-        print("Nodo lanzado en la Raspberry.")
-    except Exception as e:
-        gcs_data.raspy_status = False
-        print(f"Error al lanzar el nodo: {e}")
-
 
 
 def coordinated_changed(coord):
@@ -107,3 +77,34 @@ def coordinated_changed(coord):
         return y_changed
     else:
         return wp_changed
+    
+
+
+# Raspy config -- NOT WORKING
+SSH_HOST = "192.168.129.43"
+SSH_USER = "ucmrospy"
+SSH_ROUTE = "/home/ucmrospy/ROS2/ros_ws/src/ros_paparazzi"
+SSH_PRIVATE_KEY_PATH = os.path.expanduser("~/.ssh/id_ed25519")
+
+def raspy_button_Click():
+    try: 
+        client = SSHClient()
+        client.set_missing_host_key_policy(AutoAddPolicy())
+        client.connect(SSH_HOST, username=SSH_USER, key_filename=SSH_PRIVATE_KEY_PATH)
+
+        command = f"""
+        cd {SSH_ROUTE}
+        docker compose up raspy &
+        """
+        stdin, stdout, stderr = client.exec_command(command)
+
+        # print(stdout.read().decode())
+        # print(stderr.read().decode())
+
+        client.close()
+        gcs_data.raspy_status = True
+
+        print("Nodo lanzado en la Raspberry.")
+    except Exception as e:
+        gcs_data.raspy_status = False
+        print(f"Error al lanzar el nodo: {e}")

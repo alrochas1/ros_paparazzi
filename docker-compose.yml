@@ -15,7 +15,7 @@ services:
   computer:
     image: ucm:humble-desktop
     volumes:
-      - /dev/ttyUSB0:/dev/ttyUSB0  # Monta el puerto serie
+      - /dev/ttyUSB0:/dev/serial0 # Monta el puerto serie
       - ~/ROS2/ros_ws:/ros_ws      # Monta el workspace
     network_mode: host              
     command: /bin/bash -c "source /ros_ws/install/setup.bash && ros2 run ros_paparazzi_core computer"

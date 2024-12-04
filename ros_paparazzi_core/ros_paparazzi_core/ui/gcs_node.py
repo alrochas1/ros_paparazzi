@@ -38,10 +38,12 @@ def update_ui():
     # map_source.data = dict(x=[x], y=[y])
 
     [origin_x, origin_y] = wgs84_to_epsg(gcs_data.origin[0], gcs_data.origin[1])
+    [gps_x, gps_y] = wgs84_to_epsg(gcs_data.gps_data[0], gcs_data.gps_data[1])
     [vehicle_x, vehicle_y] = wgs84_to_epsg(latitude, longitude)
 
     map_source.data = dict(
         origin_x=[origin_x], origin_y=[origin_y], 
+        gps_x=[gps_x], gps_y=[gps_y],
         vehicle_x=[vehicle_x], vehicle_y=[vehicle_y]
     )
 
@@ -80,9 +82,10 @@ raspy_button = Button(label='Connect Raspberry', width=200, height=40)
 button3 = Button(label='Button 3', width=200, height=40)
 
 map_plot = ui_functions.plot_map()
-map_source = ColumnDataSource(data=dict(origin_x=[], origin_y=[], vehicle_x=[], vehicle_y=[]))
+map_source = ColumnDataSource(data=dict(origin_x=[], origin_y=[], vehicle_x=[], vehicle_y=[], gps_x=[], gps_y=[]))
 map_plot.scatter(x="origin_x", y="origin_y", size=12, fill_color="red", source=map_source, legend_label="Origin")
 map_plot.scatter(x="vehicle_x", y="vehicle_y", size=12, fill_color="blue", source=map_source, legend_label="Vehicle Position")
+map_plot.scatter(x="gps_x", y="gps_y", size=12, fill_color="green", source=map_source, legend_label="GPS Measure")
 # map_source = ColumnDataSource(data=dict(x=[gcs_data.origin[0]], y=[gcs_data.origin[1]]))
 # map_plot.scatter(x="x", y="y", size=12, fill_color="red", source=map_source)
 

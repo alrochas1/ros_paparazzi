@@ -313,11 +313,13 @@ class PPZI_TELEMETRY(threading.Thread):
                         time.sleep(1)
                         continue
 
-                    hex_lat = [datappzz[8], datappzz[7], datappzz[6], datappzz[5], datappzz[4]]
-                    gps_lat = serial_byteToint(hex_lat, 5)
+                    sign_lat = datappzz[4]
+                    hex_lat = [datappzz[8], datappzz[7], datappzz[6], datappzz[5]]
+                    gps_lat = calculate_signo(sign_lat)*serial_byteToint(hex_lat, 4)
 
-                    hex_lon = [datappzz[13], datappzz[12], datappzz[11], datappzz[10], datappzz[9]]
-                    gps_lon = serial_byteToint(hex_lon, 5)
+                    sign_lon = datappzz[9]
+                    hex_lon = [datappzz[13], datappzz[12], datappzz[11], datappzz[10]]
+                    gps_lon = calculate_signo(sign_lon)*serial_byteToint(hex_lon, 4)
 
                     hex_alt = [datappzz[17], datappzz[16], datappzz[15], datappzz[14]]
                     gps_alt = serial_byteToint(hex_alt, 4)

@@ -25,6 +25,8 @@ COM_VUELTA_BYTE = 0x56  # "V"
 POSITIVO = 0x00  # Positive sign
 NEGATIVO = 0x01  # Negative sign
 
+RECEIVE_INTERVAL = 0.05     # Intervalo en el que comprueba si llega un mensaje
+
 
 # Función para pasar enteros a hexadecimal
 def itoh(value, nbytes):
@@ -104,9 +106,9 @@ class PPZI_TELEMETRY(threading.Thread):
             
         while True:
             data_av = fd.in_waiting
-            print(f"\n[PPZI_RECEIVE] - Número bytes: {data_av}")
-            
+  
             if data_av > 0:
+                print(f"\n[PPZI_RECEIVE] - Número bytes: {data_av}")
                 # Todo esto es para convertir los datos leidos al formato 
                 # que se usaba en el codigo en C
                 datappzz = fd.read(data_av).strip().hex()
@@ -114,16 +116,16 @@ class PPZI_TELEMETRY(threading.Thread):
                 datappzz = [int(byte, 16) for byte in datappzz]
 
                 # Añadido el len porque daba un error si solo llegaba un byte
-                if datappzz[0] != PPZ_START_BYTE or len(datappzz) < 2:
+                if len(datappzz) < 2 or datappzz[0] != PPZ_START_BYTE:
                     print("[PPZI_RECEIVE] - NO EMPIEZA POR P \n")
-                    time.sleep(1)
+                    time.sleep(RECEIVE_INTERVAL)
                     continue
                 
 
                 if datappzz[1] == PPZ_TELEMETRY_BYTE:
                     if len(datappzz) != 25:
                         print(f"[PPZI_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 25, Received {len(datappzz)}")
-                        time.sleep(1)
+                        time.sleep(RECEIVE_INTERVAL)
                         continue
 
                     hex_checksumppzz = [datappzz[24], datappzz[23]]
@@ -131,7 +133,7 @@ class PPZI_TELEMETRY(threading.Thread):
 
                     if not compare_checksum(datappzz, checksumppzz, data_av):
                         print("[PPZI_RECEIVE] - Checksum erróneo.")
-                        time.sleep(1)
+                        time.sleep(RECEIVE_INTERVAL)
                         continue
 
                     # print("TELEMETRIA")
@@ -167,7 +169,7 @@ class PPZI_TELEMETRY(threading.Thread):
                 if datappzz[1] == PPZ_MEASURE_BYTE:
                     if len(datappzz) != 26:
                         print(f"[PPZI_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 26, Received {len(datappzz)}")
-                        time.sleep(1)
+                        time.sleep(RECEIVE_INTERVAL)
                         continue
 
                     hex_checksumppzz = [datappzz[25], datappzz[24]]
@@ -175,7 +177,7 @@ class PPZI_TELEMETRY(threading.Thread):
 
                     if not compare_checksum(datappzz, checksumppzz, data_av):
                         print("[PPZI_RECEIVE] - Checksum erróneo.")
-                        time.sleep(1)
+                        time.sleep(RECEIVE_INTERVAL)
                         continue
 
                     print("MEDIDA")
@@ -209,7 +211,7 @@ class PPZI_TELEMETRY(threading.Thread):
                     print(datappzz)
                     if len(datappzz) != 6:
                         print(f"NÚMERO BYTES INCORRECTO --> Expected 6, Received {len(datappzz)}")
-                        time.sleep(1)
+                        time.sleep(RECEIVE_INTERVAL)
                         continue
 
                     hex_checksumppzz = [datappzz[5], datappzz[4]]
@@ -217,7 +219,7 @@ class PPZI_TELEMETRY(threading.Thread):
 
                     if not compare_checksum(datappzz, checksumppzz, data_av):
                         print("Checksum erróneo.")
-                        time.sleep(1)
+                        time.sleep(RECEIVE_INTERVAL)
                         continue
 
                     print(f"[PPZI_RECEIVE] - Mensaje recibido correctamente por el autopiloto")
@@ -236,7 +238,7 @@ class PPZI_TELEMETRY(threading.Thread):
                 if datappzz[1] == PPZ_HOME_BYTE:
                     if len(datappzz) != 20:
                         print(f"[PPZI_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 20, Received {len(datappzz)}")
-                        time.sleep(1)
+                        time.sleep(RECEIVE_INTERVAL)
                         continue
 
                     hex_checksumppzz = [datappzz[19], datappzz[18]]
@@ -244,7 +246,7 @@ class PPZI_TELEMETRY(threading.Thread):
 
                     if not compare_checksum(datappzz, checksumppzz, data_av):
                         print("[PPZI_RECEIVE] - Checksum erróneo.")
-                        time.sleep(1)
+                        time.sleep(RECEIVE_INTERVAL)
                         continue
 
                     # print("TELEMETRIA")
@@ -272,7 +274,7 @@ class PPZI_TELEMETRY(threading.Thread):
                 if datappzz[1] == PPZ_IMU_BYTE:
                     if len(datappzz) != 21:
                         print(f"[PPZI_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 21, Received {len(datappzz)}")
-                        time.sleep(1)
+                        time.sleep(RECEIVE_INTERVAL)
                         continue
 
                     hex_checksumppzz = [datappzz[20], datappzz[19]]
@@ -280,7 +282,7 @@ class PPZI_TELEMETRY(threading.Thread):
 
                     if not compare_checksum(datappzz, checksumppzz, data_av):
                         print("[PPZI_RECEIVE] - Checksum erróneo.")
-                        time.sleep(1)
+                        time.sleep(RECEIVE_INTERVAL)
                         continue
 
                     sign_x = datappzz[4]
@@ -302,7 +304,7 @@ class PPZI_TELEMETRY(threading.Thread):
                 if datappzz[1] == PPZ_GPS_BYTE:
                     if len(datappzz) != 20:
                         print(f"[PPZG_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 20, Received {len(datappzz)}")
-                        time.sleep(1)
+                        time.sleep(RECEIVE_INTERVAL)
                         continue
 
                     hex_checksumppzz = [datappzz[19], datappzz[18]]
@@ -310,7 +312,7 @@ class PPZI_TELEMETRY(threading.Thread):
 
                     if not compare_checksum(datappzz, checksumppzz, data_av):
                         print("[PPZG_RECEIVE] - Checksum erróneo.")
-                        time.sleep(1)
+                        time.sleep(RECEIVE_INTERVAL)
                         continue
 
                     sign = datappzz[4]
@@ -329,5 +331,5 @@ class PPZI_TELEMETRY(threading.Thread):
 
 
 
-            time.sleep(1)
+            time.sleep(RECEIVE_INTERVAL)
 

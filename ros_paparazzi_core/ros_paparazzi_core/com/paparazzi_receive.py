@@ -25,7 +25,7 @@ COM_VUELTA_BYTE = 0x56  # "V"
 POSITIVO = 0x00  # Positive sign
 NEGATIVO = 0x01  # Negative sign
 
-RECEIVE_INTERVAL = 0.05     # Intervalo en el que comprueba si llega un mensaje
+RECEIVE_INTERVAL = 5e-02  # Intervalo en el que comprueba si llega un mensaje
 
 
 # Función para pasar enteros a hexadecimal
@@ -101,7 +101,7 @@ class PPZI_TELEMETRY(threading.Thread):
 
     def run(self):
         # Setup conexion serie
-        fd = serial.Serial(self.port, 9600, timeout=1)
+        fd = serial.Serial(self.port, self.baud_rate, timeout=1)
         # fd = serial.Serial("/dev/ttyUSB0", 9600, timeout=1)
             
         while True:

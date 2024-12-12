@@ -19,14 +19,26 @@ import numpy as np
 def calculate_imu():
 
     ux = np.mean(imu_source.data['x'])
-    uy = np.mean(imu_source.data['x'])
-    uz = np.mean(imu_source.data['x'])
+    uy = np.mean(imu_source.data['y'])
+    uz = np.mean(imu_source.data['z'])
 
     var_x = np.var(imu_source.data['x'])
     var_y = np.var(imu_source.data['y'])
     var_z = np.var(imu_source.data['z'])
 
     return [var_x, var_y, var_z]
+
+
+# TEMPORAL: For testing de GPS
+def calculate_gps():
+
+    ux = np.mean(gps_source.data['x'])
+    uy = np.mean(gps_source.data['y'])
+
+    var_x = np.var(gps_source.data['x'])
+    var_y = np.var(gps_source.data['y'])
+
+    return [var_x, var_y]
 
 
 def update_ui():
@@ -52,8 +64,10 @@ def update_ui():
 
     terminal_output.text = gcs_data.terminal_data.recover_message()
 
-    # This is temporal for the IMU
-    if gcs_data.time > 5:
+    
+    if gcs_data.time > 2:
+
+        # This is temporal for the IMU ------------
         imu_data = gcs_data.imu_data
         imu_source.stream({
             'time': [gcs_data.time],
@@ -61,14 +75,29 @@ def update_ui():
             'y': [imu_data[1]],
             'z': [imu_data[2]]
         }, rollover=1000)
+        
         var = calculate_imu()
-
-        variance_text.text = f"""
-            <b>Varianza:</b><br>
-            X: {var[0]:.7f}<br>
-            Y: {var[1]:.7f}<br>
+        variance_imu.text = f"""
+            <b>Varianza IMU:</b>  /
+            X: {var[0]:.7f}  /
+            Y: {var[1]:.7f}  /
             Z: {var[2]:.7f}
             """
+        
+        # This is temporal for the GPS Noise ---------
+        gps_source.stream({
+            'time': [gcs_data.time],
+            'x': [gps_x],
+            'y': [gps_y]
+        }, rollover=1000)
+
+        var = calculate_gps()
+        variance_gps.text = f"""
+            <b>Varianza GPS:</b>  /
+            X: {var[0]:.7f}  /
+            Y: {var[1]:.7f}
+            """
+    
     gcs_data.time = gcs_data.time + 0.1
 
 
@@ -99,6 +128,13 @@ imu_plot_z = figure(title="Accel Z", x_axis_label="Time (s)", y_axis_label="Acce
 imu_plot_z.line('time', 'z', source=imu_source, line_width=2, color='green')
 imu_plot = gridplot([[imu_plot_x, imu_plot_y, imu_plot_z]])
 
+gps_source = ColumnDataSource(data=dict(time=[], x=[], y=[]))
+gps_plot_x = figure(title="Pos X", x_axis_label="Time (s)", y_axis_label="Position (m)", width=300, height=200)
+gps_plot_x.line('time', 'x', source=gps_source, line_width=2, color='green')
+gps_plot_y = figure(title="Pos Y", x_axis_label="Time (s)", y_axis_label="Position (m)", width=300, height=200)
+gps_plot_y.line('time', 'y', source=gps_source, line_width=2, color='green')
+gps_plot = gridplot([[gps_plot_x, gps_plot_y]])
+
 
 v1x = TextInput(value='X=0.0m', width=150, height=15)
 v1y = TextInput(value='Y=0.0m', width=150, height=15)
@@ -113,14 +149,17 @@ v2z.on_change('value', ui_functions.coordinated_changed("wp"))
 wpButton = Button(label='Send Waypoint', width=60, height=40, button_type='success')
 wpButton.on_click(ui_functions.wpButton_Click)
 
-variance_text = Div(text="<b>Varianza:</b><br>X: Calculando...<br>Y: Calculando...<br>Z: Calculando...", 
+variance_imu = Div(text="<b>Varianza IMU:</b> X: Calculando... / Y: Calculando... / Z: Calculando...", 
+                    stylesheets=["div { font-size: 16px; color: black; }"])
+
+variance_gps = Div(text="<b>Varianza GPS:</b> X: Calculando... / Y: Calculando... / Z: Calculando...", 
                     stylesheets=["div { font-size: 16px; color: black; }"])
 
 terminal_output = Div(text="<b>Terminal Output:</b><br>",
             stylesheets=["div { font-size: 16px; color: black; overflow-y: scroll; height: 150px; width: 500px; border: 1px solid black; }"])
 
 buttons_column = column(Spacer(height=100), raspy_button, home_button, button3, Spacer(height=100))
-plots = column(imu_plot, variance_text)
+plots = column(imu_plot, variance_imu, gps_plot, variance_gps)
 bottom_section = row(Spacer(width=110), column(v1x, v1y), column(v2x, v2y, v2z, Spacer(height=18), wpButton))
 
 

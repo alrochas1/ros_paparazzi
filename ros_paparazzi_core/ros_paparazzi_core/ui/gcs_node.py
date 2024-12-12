@@ -84,7 +84,7 @@ def update_ui():
             Z: {var[2]:.7f}
             """
         
-        # This is temporal for the GPS Noise ---------
+        # This is temporal for the GPS  ---------
         gps_source.stream({
             'time': [gcs_data.time],
             'x': [gps_x],

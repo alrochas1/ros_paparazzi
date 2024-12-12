@@ -7,7 +7,7 @@ from ros_paparazzi_core.data import gcs_data
 from ros_paparazzi_core.nodes.telemetry_receiver import Telemetry_Receiver
 from ros_paparazzi_core.nodes.waypoint_button import Waypoint_Button
 from ros_paparazzi_core.nodes.home_button import Home_Button
-from ros_paparazzi_core.nodes.waypoint_sender import Waypoint_Sender
+from ros_paparazzi_core.nodes.waypoint_service import Waypoint_Service
 
 from ros_paparazzi_core.ui.ui_elements import get_terminal_manager
 
@@ -19,7 +19,7 @@ def start_nodes():
     executor = MultiThreadedExecutor()
     
     telemetry_node = Telemetry_Receiver()
-    waypoint_service = Waypoint_Sender()
+    waypoint_service = Waypoint_Service()
 
     executor.add_node(telemetry_node)
     executor.add_node(waypoint_service)

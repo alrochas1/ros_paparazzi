@@ -53,7 +53,7 @@ class SIM_Kalman(Node):
 
         self.Q = np.eye(4)*rho
         self.R = np.eye(4)
-        self.P = np.eye(4)*50
+        self.P = np.eye(4)*500
 
         self.X = np.zeros((4, 1))
         self.Y = np.array([[0.0], [0.0], [0.0], [0.0]])
@@ -88,7 +88,6 @@ class SIM_Kalman(Node):
         x, y = geo_tools.wgs84_to_ltp(or_x, or_y, msg.latitude, msg.longitude)
         self.Y[0] = float(x)
         self.Y[1] = float(y)
-        print(f'Y = {self.Y}')
         tmp1 = np.matmul(self.C, self.X)
         tmp2 = self.Y - tmp1
         tmp1 = np.matmul(self.K, tmp2)
@@ -100,6 +99,7 @@ class SIM_Kalman(Node):
         I = np.eye(self.P.shape[0])
         tmp1 = I - np.matmul(self.K, self.C)
         self.P = np.matmul(tmp1, self.P)
+        print(f'K = {self.K}')
 
 
     def update_speed(self, msg):

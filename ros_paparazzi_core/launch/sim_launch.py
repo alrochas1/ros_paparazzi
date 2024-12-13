@@ -19,6 +19,14 @@ def generate_launch_description():
             name='IMU_SIM',
             output='screen',
             emulate_tty=True
+        ),
+
+        Node(
+            package='ros_paparazzi_core',
+            executable='sim:kalman',
+            name='KALMAN_SIM',
+            output='screen',
+            emulate_tty=True
         )
 
     ])

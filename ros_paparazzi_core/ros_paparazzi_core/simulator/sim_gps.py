@@ -12,7 +12,7 @@ import time
 class SIM_GPS(Node):
 
     def __init__(self):
-        super().__init__('GPS_IMU')
+        super().__init__('SIM_GPS')
         self.GPS_publisher = self.create_publisher(NavSatFix, 'sensors/gps', 10)
 
         config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sim_config.yaml')

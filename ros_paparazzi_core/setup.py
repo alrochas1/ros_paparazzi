@@ -32,8 +32,10 @@ setup(
                 'telemetry = ros_paparazzi_core.telemetry_receiver:main',
                 'data_provider = ros_paparazzi_core.data_provider:main',    # Legacy
                 'bokeh_serve = ros_paparazzi_core.scripts.bokeh_serve:main',
+                # Simulator
                 'sim:imu = ros_paparazzi_core.simulator.sim_imu:main',
                 'sim:gps = ros_paparazzi_core.simulator.sim_gps:main',
+                'sim:kalman = ros_paparazzi_core.simulator.kalman_filter:main',
         ],
         'launch.frontend': [
             'main_launch = ros_paparazzi_core.launch.main_launch',

@@ -23,3 +23,16 @@ def wgs84_to_epsg(lat, lon):
     transformer = Transformer.from_crs(crs.geodetic_crs, crs)
 
     return transformer.transform(lat, lon)
+
+
+# REVISAR
+def ecef_to_ltp(origin_lat, origin_lon, x_ecef, y_ecef, z_ecef):
+
+    ecef_proj = Proj(proj="geocent", ellps="WGS84", datum="WGS84")
+    ltp_proj = Proj(proj="tmerc", lat_0=origin_lat, lon_0=origin_lon, ellps="WGS84", datum="WGS84")
+    
+    transformer = Transformer.from_proj(ecef_proj, ltp_proj)
+    
+    x_ltp, y_ltp, z_ltp = transformer.transform(x_ecef, y_ecef, z_ecef, radians=False)
+    
+    return x_ltp, y_ltp

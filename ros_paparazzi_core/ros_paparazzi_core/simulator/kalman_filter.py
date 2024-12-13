@@ -1,7 +1,7 @@
 # This one is for implementing a Kalman Filter using the data for the simulation
 
 #TODO: Check if the IMU data is correct (with the orientation)
-#TODO: Use the real GPS Speed
+#TODO: Check the estimated position (that currently is pretty bad).
 
 import rclpy
 from rclpy.node import Node
@@ -11,6 +11,7 @@ from sensor_msgs.msg import NavSatFix
 from geometry_msgs.msg import Vector3
 
 from ros_paparazzi_core.aux import geo_tools
+from ros_paparazzi_core.data import gcs_data
 
 import numpy as np
 
@@ -18,7 +19,7 @@ import numpy as np
 # For the filter
 R2_IMU = 2.5e-4
 
-or_x = 40.4506486; or_y = -3.7271496
+or_x = gcs_data.origin[0]; or_y = gcs_data.origin[1]
 
 class SIM_Kalman(Node):
 
@@ -26,8 +27,9 @@ class SIM_Kalman(Node):
         super().__init__('SIM_Kalman')
 
         self.Kalman_publisher = self.create_publisher(Waypoint, 'waypoints/telemetry_gps', 10)
-        self.IMU_subscription = self.create_subscription(Vector3, 'sensors/imu', self.kalman_predict, 10)
+        # self.IMU_subscription = self.create_subscription(Vector3, 'sensors/imu', self.kalman_predict, 10)
         self.GPS_subscription = self.create_subscription(NavSatFix, 'sensors/gps', self.kalman_update, 10)
+        self.GPS_subscription = self.create_subscription(Vector3, 'sensors/gps/speed', self.update_speed, 10)
 
         self.kalman_init()
 
@@ -54,6 +56,7 @@ class SIM_Kalman(Node):
         self.P = np.eye(4)*50
 
         self.X = np.zeros((4, 1))
+        self.Y = np.array([[0.0], [0.0], [0.0], [0.0]])
 
 
 
@@ -64,7 +67,6 @@ class SIM_Kalman(Node):
         tmp2 = np.matmul(self.B, U)
 
         self.X = tmp1 + tmp2
-        print(f'X = {self.X}')
 
         # Calculo de P = APA + Q
         tmp1 = np.matmul(self.A, self.P)
@@ -84,12 +86,14 @@ class SIM_Kalman(Node):
 
         # Calculo de x = x + K(Y - Cx)
         x, y = geo_tools.wgs84_to_ltp(or_x, or_y, msg.latitude, msg.longitude)
-        Y = np.array([[x], [y], [1], [1]])
-        print(f'Y = {Y}')
+        self.Y[0] = float(x)
+        self.Y[1] = float(y)
+        print(f'Y = {self.Y}')
         tmp1 = np.matmul(self.C, self.X)
-        tmp2 = Y - tmp1
+        tmp2 = self.Y - tmp1
         tmp1 = np.matmul(self.K, tmp2)
         self.X = self.X + tmp1
+        print(f'X = {self.X}')
         self.publish_state()
 
         # Calculo de P = (I - KC)P
@@ -97,6 +101,10 @@ class SIM_Kalman(Node):
         tmp1 = I - np.matmul(self.K, self.C)
         self.P = np.matmul(tmp1, self.P)
 
+
+    def update_speed(self, msg):
+        self.Y[2] = msg.x
+        self.Y[3] = msg.y
 
 
     def publish_state(self):

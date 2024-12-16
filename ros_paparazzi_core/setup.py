@@ -35,7 +35,7 @@ setup(
                 # Simulator
                 'sim:imu = ros_paparazzi_core.simulator.sim_imu:main',
                 'sim:gps = ros_paparazzi_core.simulator.sim_gps:main',
-                'sim:kalman = ros_paparazzi_core.simulator.kalman_filter:main',
+                'sim:kalman = ros_paparazzi_core.simulator.extended_kalman_filter:main',
         ],
         'launch.frontend': [
             'main_launch = ros_paparazzi_core.launch.main_launch',

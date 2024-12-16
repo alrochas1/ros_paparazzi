@@ -1,7 +1,7 @@
 # This one is for implementing a Kalman Filter using the data for the simulation
 
 #TODO: Check if the IMU data is correct (with the orientation)
-#TODO: Check the estimated position (that currently is pretty bad).
+#TODO: Check the estimated position (currently is OK).
 
 import rclpy
 from rclpy.node import Node
@@ -17,6 +17,7 @@ import numpy as np
 
 
 # For the filter
+# R2_IMU = 2.5e-4
 R2_IMU = 2.5e-4
 
 or_x = gcs_data.origin[0]; or_y = gcs_data.origin[1]
@@ -27,9 +28,10 @@ class SIM_Kalman(Node):
         super().__init__('SIM_Kalman')
 
         self.Kalman_publisher = self.create_publisher(Waypoint, 'waypoints/telemetry_gps', 10)
-        # self.IMU_subscription = self.create_subscription(Vector3, 'sensors/imu', self.kalman_predict, 10)
+        self.IMU_subscription = self.create_subscription(Vector3, 'sensors/imu', self.kalman_predict, 10)
         self.GPS_subscription = self.create_subscription(NavSatFix, 'sensors/gps', self.kalman_update, 10)
         self.GPS_subscription = self.create_subscription(Vector3, 'sensors/gps/speed', self.update_speed, 10)
+        self.ATTITUDE_subscription = self.create_subscription(Vector3, 'sensors/attitude', self.update_theta, 10)
 
         self.kalman_init()
 
@@ -52,17 +54,25 @@ class SIM_Kalman(Node):
         self.C = np.eye(4)
 
         self.Q = np.eye(4)*rho
-        self.R = np.eye(4)
+        self.R = np.eye(4)*0.001
         self.P = np.eye(4)*500
 
         self.X = np.zeros((4, 1))
         self.Y = np.array([[0.0], [0.0], [0.0], [0.0]])
 
+        self.Theta = 0      # Provisional
+
 
 
     def kalman_predict(self, msg):
         # Calculo de X = Ax + Bu
-        U = np.array([[msg.x], [msg.y]])
+        axc = msg.x / 1024.0
+        ayc = msg.y / 1024.0
+        ax = axc*np.cos(self.Theta) - ayc*np.sin(self.Theta)
+        ay = axc*np.sin(self.Theta) + ayc*np.cos(self.Theta)
+        # ax = axc
+        # ay = ayc
+        U = np.array([[ax], [ay]])
         tmp1 = np.matmul(self.A, self.X)
         tmp2 = np.matmul(self.B, U)
 
@@ -99,12 +109,15 @@ class SIM_Kalman(Node):
         I = np.eye(self.P.shape[0])
         tmp1 = I - np.matmul(self.K, self.C)
         self.P = np.matmul(tmp1, self.P)
-        print(f'K = {self.K}')
+        print(f'Y = {self.Y}')
 
 
     def update_speed(self, msg):
         self.Y[2] = msg.x
         self.Y[3] = msg.y
+
+    def update_theta(self, msg):
+        self.Theta = msg.y
 
 
     def publish_state(self):

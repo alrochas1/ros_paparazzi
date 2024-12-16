@@ -1,5 +1,5 @@
 # TODO: Maybe separate the waypoint_service to a diferent launch code
-# TODO: Solve problem with the origin in the trajectory (NOT important)
+# TODO: Solve problem with the origin in the trajectory (partially solved)
 
 import rclpy
 
@@ -52,13 +52,14 @@ def update_ui():
     [gps_x, gps_y] = wgs84_to_epsg(gcs_data.gps_data[0], gcs_data.gps_data[1])
     [vehicle_x, vehicle_y] = wgs84_to_epsg(latitude, longitude)
 
-    trajectory_x = list(tray_source.data["tray_x"])
-    trajectory_x.append(vehicle_x)
-    trajectory_y = list(tray_source.data["tray_y"])
-    trajectory_y.append(vehicle_y)
-    if len(trajectory_x) > 100:
-        trajectory_x.pop(0)
-        trajectory_y.pop(0)
+    if vehicle_x != 0 and vehicle_y != 0:
+        trajectory_x = list(tray_source.data["tray_x"])
+        trajectory_x.append(vehicle_x)
+        trajectory_y = list(tray_source.data["tray_y"])
+        trajectory_y.append(vehicle_y)
+        if len(trajectory_x) > 100:
+            trajectory_x.pop(0)
+            trajectory_y.pop(0)
 
     map_source.data = dict(
         origin_x=[origin_x], origin_y=[origin_y], 
@@ -127,9 +128,8 @@ map_source = ColumnDataSource(data=dict(
 tray_source = ColumnDataSource(data=dict(tray_x=[], tray_y=[]))
 map_plot.scatter(x="origin_x", y="origin_y", size=12, fill_color="red", source=map_source, legend_label="Origin")
 map_plot.scatter(x="vehicle_x", y="vehicle_y", size=12, fill_color="blue", source=map_source, legend_label="Vehicle Position")
-map_plot.scatter(x="gps_x", y="gps_y", size=12, fill_color="green", source=map_source, legend_label="GPS Measure")
 map_plot.line(x="tray_x", y="tray_y", line_width=2, color="blue", source=tray_source, legend_label="Trajectory")
-
+map_plot.scatter(x="gps_x", y="gps_y", size=12, fill_color="green", source=map_source, legend_label="GPS Measure")
 
 # Dos plots por si acaso tambien
 imu_source = ColumnDataSource(data=dict(time=[], x=[], y=[], z=[]))

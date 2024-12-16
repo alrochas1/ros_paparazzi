@@ -8,12 +8,16 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Waypoint.msg"
+  "msg/KalmanPredict.msg"
+  "msg/KalmanUpdate.msg"
   "srv/GetWaypoint.srv"
   DEPENDENCIES sensor_msgs
+  DEPENDENCIES geometry_msgs
   DEPENDENCIES builtin_interfaces
 )
 

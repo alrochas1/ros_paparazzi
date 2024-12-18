@@ -1,6 +1,7 @@
 # This one is for implementing a Extended Kalman Filter using the data for the simulation
 
-# TODO: Falta el update, el predict ya funciona
+# TODO: Check if the IMU data is correct (with the orientation)
+# TODO: Check the estimated position (currently is OK).
 
 import rclpy
 from rclpy.node import Node
@@ -17,7 +18,7 @@ or_x = gcs_data.origin[0]; or_y = gcs_data.origin[1]
 
 # For the filter
 R2_IMU = 2.5e-4 # Varianza de la IMU
-RP = 1          # Varianza de la Posición del GPS
+RP = 0.0005          # Varianza de la Posición del GPS
 RV = 1          # Varianza de la Velocidad del GPS
 RT = 10         # Varianza de la Actitud
 

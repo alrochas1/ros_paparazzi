@@ -61,12 +61,14 @@ def update_ui():
             trajectory_x.pop(0)
             trajectory_y.pop(0)
 
+        tray_source.data = dict(tray_x=trajectory_x, tray_y=trajectory_y)
+
     map_source.data = dict(
         origin_x=[origin_x], origin_y=[origin_y], 
         gps_x=[gps_x], gps_y=[gps_y],
         vehicle_x=[vehicle_x], vehicle_y=[vehicle_y],
     )
-    tray_source.data = dict(tray_x=trajectory_x, tray_y=trajectory_y)
+    
 
     if gcs_data.raspy_status:   raspy_button.button_type = "success"
     else:  raspy_button.button_type = "danger" 

@@ -1,7 +1,6 @@
 # This one is for implementing a Kalman Filter using the data for the simulation
 
-#TODO: Check if the IMU data is correct (with the orientation)
-#TODO: Check the estimated position (currently is OK).
+# This one is outdated, the structure is clearer in the extended_kalman_filter.py
 
 import rclpy
 from rclpy.node import Node
@@ -58,7 +57,7 @@ class SIM_Kalman(Node):
         self.P = np.eye(4)*500
 
         self.X = np.zeros((4, 1))
-        self.Y = np.array([[0.0], [0.0], [0.0], [0.0]])
+        self.Y = np.zeros((4, 1))
 
         self.Theta = 0      # Provisional
 

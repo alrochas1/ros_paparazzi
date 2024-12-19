@@ -193,4 +193,4 @@ start_nodes()
 
 
 curdoc().add_root(layout)
-curdoc().add_periodic_callback(update_ui, 100)
+curdoc().add_periodic_callback(update_ui, 50)

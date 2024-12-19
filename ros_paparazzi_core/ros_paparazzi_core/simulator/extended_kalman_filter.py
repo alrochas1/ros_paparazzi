@@ -18,7 +18,7 @@ or_x = gcs_data.origin[0]; or_y = gcs_data.origin[1]
 
 # For the filter
 R2_IMU = 2.5e-4 # Varianza de la IMU
-RP = 0.0005          # Varianza de la Posición del GPS
+RP = 0.05          # Varianza de la Posición del GPS
 RV = 1          # Varianza de la Velocidad del GPS
 RT = 10         # Varianza de la Actitud
 
@@ -29,15 +29,15 @@ class SIM_Kalman(Node):
         super().__init__('SIM_Extended_Kalman')
 
         self.Kalman_publisher = self.create_publisher(Waypoint, 'waypoints/telemetry_gps', 10)
-        self.UPDATE_subscription = self.create_subscription(KalmanUpdate, 'kalman/update', self.kalman_update, 10)
         self.PREDICT_subscription = self.create_subscription(KalmanPredict, 'kalman/predict', self.kalman_predict, 10)
+        self.UPDATE_subscription = self.create_subscription(KalmanUpdate, 'kalman/update', self.kalman_update, 10)
 
         self.kalman_init()
 
     def kalman_init(self):
 
         dt = 0.3
-        rho = R2_IMU * pow(dt, 4)
+        rho = R2_IMU # * pow(dt, 4)
 
         self.Q = np.eye(5) * rho
         self.R = np.eye(5) * 0.1
@@ -95,8 +95,9 @@ class SIM_Kalman(Node):
     
 
     def kalman_predict(self, msg):
-        dt = 0.3    # Provisional
+        # dt = 0.008    # Provisional
 
+        dt = msg.dt
         ax = msg.imu.x / 1024.0
         ay = msg.imu.y / 1024.0
         az = msg.imu.y / 1024.0
@@ -107,7 +108,7 @@ class SIM_Kalman(Node):
 
         F = self.jacobian_F(self.X, U, dt)
         self.P = F @ self.P @ F.T + self.Q
-
+        # self.publish_state()
 
     def kalman_update(self, msg):
 

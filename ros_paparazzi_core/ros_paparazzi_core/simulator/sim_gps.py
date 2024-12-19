@@ -1,12 +1,9 @@
 import rclpy
 from rclpy.node import Node
 
-from geometry_msgs.msg import Vector3
 from sensor_msgs.msg import NavSatFix
 
 from ros_paparazzi_core.simulator import sim_functions
-from ros_paparazzi_core.aux import geo_tools
-from ros_paparazzi_core.data import gcs_data
 from ros_paparazzi_interfaces.msg import KalmanUpdate
 
 import os
@@ -38,6 +35,8 @@ class SIM_GPS(Node):
         self.t2 = sim_functions.get_column(self.data, 0)
         self.theta = sim_functions.get_column(self.data, 3) # rad
 
+        self.gps_index = 0
+        self.imu_index = 0
         self.time_index = 0
 
 

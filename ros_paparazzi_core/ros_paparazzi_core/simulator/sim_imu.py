@@ -44,12 +44,14 @@ class SIM_IMU(Node):
             self.IMU_publisher.publish(msg)
             kf = KalmanPredict()
             kf.imu.x = msg.x; kf.imu.y = msg.y; kf.imu.z = msg.z
-            self.KalmanPublisher.publish(kf)
+            
             self.get_logger().info(f'Publishing IMU_Data [t={self.t[self.time_index]}]: [{msg.x}, {msg.y}, {msg.z}]')
         
             if self.time_index < len(self.t) - 1:
                 sleep_duration = self.t[self.time_index + 1] - self.t[self.time_index]
                 sleep_duration = max(0.0, sleep_duration)   # Por si acaso
+                kf.dt = sleep_duration
+                self.KalmanPublisher.publish(kf)
                 time.sleep(sleep_duration)
 
             self.time_index += 1

@@ -33,6 +33,7 @@ setup(
                 'data_provider = ros_paparazzi_core.data_provider:main',    # Legacy
                 'bokeh_serve = ros_paparazzi_core.scripts.bokeh_serve:main',
                 # Simulator
+                'sim:core = ros_paparazzi_core.simulator.sim_core:main',
                 'sim:imu = ros_paparazzi_core.simulator.sim_imu:main',
                 'sim:gps = ros_paparazzi_core.simulator.sim_gps:main',
                 'sim:kalman = ros_paparazzi_core.simulator.extended_kalman_filter:main',

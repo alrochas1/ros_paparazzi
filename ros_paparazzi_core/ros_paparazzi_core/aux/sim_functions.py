@@ -1,3 +1,5 @@
+# Auxiliar functions for the simulator
+
 import os
 import yaml
 
@@ -8,11 +10,34 @@ def read_txt(self, filepath):
         try:
             with open(filepath, 'r') as file:
                 for line in file:
-                    values = [float(x) if '.' in x else int(x) for x in line.strip().split()]
+                    values = [float(x) if 'e' in x or '.' in x else int(x) for x in line.strip().split()]
                     self.data.append(values)
 
         except Exception as e:
              print(f"Failed to read the data: {e}")            
+
+
+
+def get_time_vector(file_name):
+    try:
+        with open(file_name, 'r') as file:
+            time_vector = []
+            for line in file:
+                first_value = float(line.split()[0])
+                time_vector.append(first_value)
+            return time_vector
+        
+    except FileNotFoundError:
+        print(f"Error: The file '{file_name}' doesnt exist")
+        return []
+    
+    except ValueError:
+        print(f"Error: Can convert some values of '{file_name}' to float")
+        return []
+    except Exception as e:
+        print(f"UnexpectedError: {e}")
+        return []
+
 
 
 

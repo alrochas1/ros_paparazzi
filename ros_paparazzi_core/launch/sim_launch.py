@@ -5,6 +5,15 @@ def generate_launch_description():
 
     return LaunchDescription([
     
+
+        Node(
+            package='ros_paparazzi_core',
+            executable='sim:core',
+            name='SIM_CORE',
+            output='screen',
+            emulate_tty=True
+        ),
+
         Node(
             package='ros_paparazzi_core',
             executable='sim:gps',
@@ -20,6 +29,7 @@ def generate_launch_description():
             output='screen',
             emulate_tty=True
         ),
+
 
         Node(
             package='ros_paparazzi_core',

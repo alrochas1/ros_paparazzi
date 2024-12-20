@@ -2,8 +2,9 @@ import rclpy
 from rclpy.node import Node
 
 from geometry_msgs.msg import Vector3
+from std_msgs.msg import Header
 
-from ros_paparazzi_core.simulator import sim_functions
+from ros_paparazzi_core.aux import sim_functions
 from ros_paparazzi_interfaces.msg import KalmanPredict 
 
 import os
@@ -15,6 +16,7 @@ class SIM_IMU(Node):
         super().__init__('SIM_IMU')
         self.IMU_publisher = self.create_publisher(Vector3, 'sensors/imu', 10)
         self.KalmanPublisher = self.create_publisher(KalmanPredict, 'kalman/predict', 10)
+        self.SIMCORE_suscriber = self.create_subscription(Header, 'sim/sensor_event', self.sim_callback, 10)
 
         # TEMPORALMENTE lo apaño aqui con dos archivos
         config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sim_config.yaml')
@@ -22,54 +24,42 @@ class SIM_IMU(Node):
         filepath = os.path.join(base_dir, "imu_data.txt")
         sim_functions.read_txt(self, filepath)
         
-        self.t = sim_functions.get_column(self.data, 0)
+        self.t_imu = sim_functions.get_column(self.data, 0)
         self.ax = sim_functions.get_column(self.data, 8)
         self.ay = sim_functions.get_column(self.data, 9)
         self.az = sim_functions.get_column(self.data, 10)
 
-        self.time_index = 0
+        self.imu_index = 0
 
 
-    def run(self):
+    def sim_callback(self, msg):
 
-        while rclpy.ok():
-            if self.time_index >= len(self.t):
+        if msg.frame_id == 'imu':
+
+            if self.imu_index >= len(self.t_imu):
                 self.get_logger().info("Rebooting IMU Simulator")
-                self.time_index = 0
+                self.imu_index = 0
 
             msg = Vector3()
-            msg.x = float(self.ax[self.time_index])
-            msg.y = float(self.ay[self.time_index])
-            msg.z = float(self.az[self.time_index])
+            msg.x = float(self.ax[self.imu_index])
+            msg.y = float(self.ay[self.imu_index])
+            msg.z = float(self.az[self.imu_index])
             self.IMU_publisher.publish(msg)
             kf = KalmanPredict()
             kf.imu.x = msg.x; kf.imu.y = msg.y; kf.imu.z = msg.z
             
-            self.get_logger().info(f'Publishing IMU_Data [t={self.t[self.time_index]}]: [{msg.x}, {msg.y}, {msg.z}]')
-        
-            if self.time_index < len(self.t) - 1:
-                sleep_duration = self.t[self.time_index + 1] - self.t[self.time_index]
-                sleep_duration = max(0.0, sleep_duration)   # Por si acaso
-                kf.dt = sleep_duration
-                self.KalmanPublisher.publish(kf)
-                time.sleep(sleep_duration)
-
-            self.time_index += 1
-
+            self.get_logger().info(f'Publishing IMU_Data [t={self.t_imu[self.imu_index]}]: [{msg.x}, {msg.y}, {msg.z}]')
+            self.imu_index += 1
 
 
 def main(args=None):
     rclpy.init(args=args)
 
     node = SIM_IMU()
+    rclpy.spin(node)
 
-    try:
-        node.run()
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
-
-
+    node.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == '__main__':
     main()

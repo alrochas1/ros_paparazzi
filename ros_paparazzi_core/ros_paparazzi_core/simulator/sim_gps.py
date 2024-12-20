@@ -2,8 +2,9 @@ import rclpy
 from rclpy.node import Node
 
 from sensor_msgs.msg import NavSatFix
+from std_msgs.msg import Header
 
-from ros_paparazzi_core.simulator import sim_functions
+from ros_paparazzi_core.aux import sim_functions
 from ros_paparazzi_interfaces.msg import KalmanUpdate
 
 import os
@@ -15,6 +16,7 @@ class SIM_GPS(Node):
         super().__init__('SIM_GPS')
         self.GPS_publisher = self.create_publisher(NavSatFix, 'sensors/gps', 10)
         self.KalmanPublisher = self.create_publisher(KalmanUpdate, 'kalman/update', 10)
+        self.SIMCORE_suscriber = self.create_subscription(Header, 'sim/sensor_event', self.sim_callback, 10)
 
         config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sim_config.yaml')
         base_dir = sim_functions.load_config(self, config_path)
@@ -23,7 +25,7 @@ class SIM_GPS(Node):
 
         # Lee los datos del GPS
         sim_functions.read_txt(self, filepath_gps)
-        self.t = sim_functions.get_column(self.data, 0)
+        self.t_gps = sim_functions.get_column(self.data, 0)
         self.lat = sim_functions.get_column(self.data, 5)
         self.lon = sim_functions.get_column(self.data, 6)
         self.vx = sim_functions.get_column(self.data, 9)
@@ -32,61 +34,62 @@ class SIM_GPS(Node):
 
         # Lee los datos de actitud
         sim_functions.read_txt(self, filepath_attitude)
-        self.t2 = sim_functions.get_column(self.data, 0)
-        self.theta = sim_functions.get_column(self.data, 3) # rad
+        self.t_attitude = sim_functions.get_column(self.data, 0)
+        self.theta_data = sim_functions.get_column(self.data, 3) # rad
 
         self.gps_index = 0
-        self.imu_index = 0
-        self.time_index = 0
+        self.attitude_index = 0
+        self.theta = 0
 
 
-    def run(self):
+    def sim_callback(self, msg):
 
-        while rclpy.ok():
-            if self.time_index >= len(self.t):
+        if msg.frame_id == 'gps':
+
+            if self.gps_index >= len(self.t_gps):
                 self.get_logger().info("Rebooting GPS Simulator")
-                self.time_index = 0
+                self.gps_index = 0
 
             # Rellena los mensajes de ambos topics
             kf_msg = KalmanUpdate()
             msg = NavSatFix()
-            kf_msg.gps_speed.x = float(self.vx[self.time_index] * 1e-02)
-            kf_msg.gps_speed.x = float(self.vy[self.time_index] * 1e-02)
-            kf_msg.gps_speed.z = float(self.vz[self.time_index] * 1e-02)
-            # self.get_logger().info(f'Publishing GPS_Speed [t={self.t[self.time_index]}]: [{msg.x}, {msg.y}]')
+            kf_msg.gps_speed.x = float(self.vx[self.gps_index] * 1e-02)
+            kf_msg.gps_speed.x = float(self.vy[self.gps_index] * 1e-02)
+            kf_msg.gps_speed.z = float(self.vz[self.gps_index] * 1e-02)
+            kf_msg.theta = float(self.theta)
             
-            msg.latitude = float(self.lat[self.time_index] * 1e-07)
-            msg.longitude = float(self.lon[self.time_index] * 1e-07)
+            msg.latitude = float(self.lat[self.gps_index] * 1e-07)
+            msg.longitude = float(self.lon[self.gps_index] * 1e-07)
             kf_msg.latitude = msg.latitude
             kf_msg.longitude = msg.longitude
 
-            if self.time_index < len(self.t2) - 1:
-                kf_msg.theta = float(self.theta[self.time_index])
-                self.get_logger().info(f'Publishing Theta [t={self.t2[self.time_index]}]: [{kf_msg.theta} rad]')
-
             self.GPS_publisher.publish(msg)
             self.KalmanPublisher.publish(kf_msg)
-            self.get_logger().info(f'Publishing GPS_Data [t={self.t[self.time_index]}]: [{msg.latitude}, {msg.longitude}]')
 
-            if self.time_index < len(self.t) - 1:
-                sleep_duration = self.t[self.time_index + 1] - self.t[self.time_index]
-                sleep_duration = max(0.0, sleep_duration)   # Por si acaso
-                time.sleep(sleep_duration)
+            self.get_logger().info(f'Publishing GPS_Speed [t={self.t_gps[self.gps_index]}]: [{msg.latitude}, {msg.longitude}]')
+            self.gps_index += 1
 
-            self.time_index += 1
+
+        elif msg.frame_id == 'attitude':
+            
+            if self.attitude_index >= len(self.t_attitude):
+                self.get_logger().info("Rebooting Attitude Simulator")
+                self.attitude_index = 0
+
+            self.theta = float(self.theta_data[self.attitude_index])
+            self.get_logger().info(f'Publishing Theta [t={self.t_attitude[self.attitude_index]}]: [{self.theta} rad]')
+            self.attitude_index += 1
+
 
 
 def main(args=None):
     rclpy.init(args=args)
 
     node = SIM_GPS()
+    rclpy.spin(node)
 
-    try:
-        node.run()
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
-
+    node.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == '__main__':
     main()

@@ -38,7 +38,6 @@ class SIM_CORE(Node):
 
         i = 0
         sleep_time = 0
-        self.get_logger().info(f"Len = {len(self.sensor_events)}")
         while i < len(self.sensor_events) - 1:
             while sleep_time == 0:
 
@@ -56,13 +55,12 @@ class SIM_CORE(Node):
 
                 sleep_time = next_timestamp - timestamp
 
-                # In case there are multiple data at the same time
-                self.get_logger().info(f"i = {i}, len = {len(self.sensor_events)}")
-                if sleep_time == 0:
-                    if  i < len(self.sensor_events) - 1:
-                        i += 1
-                    else:
-                        self.get_logger().info(f"Closing the simulator ... \n Reset the simulation to continue (Ctrl + C)")
+                if  i >= len(self.sensor_events) - 2:
+                    self.get_logger().info(f"Closing the simulator ... \n Reset the simulation to continue (Ctrl + C)")
+                    break
+                else:
+                    if sleep_time == 0: # In case there are multiple data at the same time
+                       i += 1
 
             self.get_logger().debug(f"Sleeping for {sleep_time} seconds")
             time.sleep(sleep_time)
@@ -89,6 +87,7 @@ class SIM_CORE(Node):
 
         kf = KalmanPredict()
         kf.imu.x = imu_msg.x; kf.imu.y = imu_msg.y; kf.imu.z = imu_msg.z
+        kf.dt = self.t_imu[self.imu_index] - self.t_imu[self.imu_index-1]
         self.KalmanPredict.publish(kf)
         self.get_logger().info(f'Publishing IMU_Data [t={self.t_imu[self.imu_index]}]: [{imu_msg.x}, {imu_msg.y}, {imu_msg.z}]')
 

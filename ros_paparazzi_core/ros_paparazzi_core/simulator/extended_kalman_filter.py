@@ -97,6 +97,7 @@ class SIM_Kalman(Node):
         # dt = 0.008    # Provisional
 
         dt = msg.dt
+        self.get_logger().info(f"dt = {dt}")
         ax = msg.imu.x / 1024.0
         ay = msg.imu.y / 1024.0
         az = msg.imu.y / 1024.0

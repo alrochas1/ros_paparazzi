@@ -57,10 +57,14 @@ class SIM_CORE(Node):
                 sleep_time = next_timestamp - timestamp
 
                 # In case there are multiple data at the same time
-                if (sleep_time == 0) and (i < len(self.sensor_events) - 1): 
-                    i += 1
+                self.get_logger().info(f"i = {i}, len = {len(self.sensor_events)}")
+                if sleep_time == 0:
+                    if  i < len(self.sensor_events) - 1:
+                        i += 1
+                    else:
+                        self.get_logger().info(f"Closing the simulator ... \n Reset the simulation to continue (Ctrl + C)")
 
-            self.get_logger().info(f"Sleeping for {sleep_time} seconds")
+            self.get_logger().debug(f"Sleeping for {sleep_time} seconds")
             time.sleep(sleep_time)
             i += 1
             sleep_time = 0
@@ -73,9 +77,9 @@ class SIM_CORE(Node):
     ############################################## 
 
     def publish_predict(self):
-        if self.imu_index >= len(self.t_imu):
-            self.get_logger().info("Rebooting IMU Simulator")
-            self.imu_index = 0
+        # if self.imu_index >= len(self.t_imu):
+        #     self.get_logger().info("Rebooting IMU Simulator")
+        #     self.imu_index = 0
 
         imu_msg = Vector3()
         imu_msg.x = float(self.ax[self.imu_index])
@@ -92,9 +96,9 @@ class SIM_CORE(Node):
 
 
     def publish_update(self):
-        if self.gps_index >= len(self.t_gps):
-            self.get_logger().info("Rebooting GPS Simulator")
-            self.gps_index = 0
+        # if self.gps_index >= len(self.t_gps):
+        #     self.get_logger().info("Rebooting GPS Simulator")
+        #     self.gps_index = 0
 
         kf_msg = KalmanUpdate()
         msg = NavSatFix()
@@ -116,9 +120,9 @@ class SIM_CORE(Node):
 
 
     def update_attitude(self):
-        if self.attitude_index >= len(self.t_attitude):
-            self.get_logger().info("Rebooting Attitude Simulator")
-            self.attitude_index = 0
+        # if self.attitude_index >= len(self.t_attitude):
+        #     self.get_logger().info("Rebooting Attitude Simulator")
+        #     self.attitude_index = 0
 
         self.theta = float(self.theta_data[self.attitude_index])
         self.get_logger().info(f'Publishing Theta [t={self.t_attitude[self.attitude_index]}]: [{self.theta} rad]')

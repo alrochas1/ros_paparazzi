@@ -69,5 +69,14 @@ Currently, there are two working buttons
 - The Connect Raspberry will launch the node in the Raspberry (not working)
 
 
+## The Simulator
+
+To replace the data sent by telemetry with the data obtained during testing, launch the simulation with: 
+```
+ros2 launch ros_paparazzi_core sim_launch.py
+```
+
+You will probably need to update the path from which the data is read in `sim_config.yaml`
+
 
 

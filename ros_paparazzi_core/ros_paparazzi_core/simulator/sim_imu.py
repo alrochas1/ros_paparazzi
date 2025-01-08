@@ -21,14 +21,11 @@ class SIM_IMU(Node):
         # TEMPORALMENTE lo apaño aqui con dos archivos
         config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sim_config.yaml')
         base_dir = sim_functions.load_config(self, config_path)
-        filepath = os.path.join(base_dir, "imu_data.txt")
-        sim_functions.read_txt(self, filepath)
-        
+        sim_functions.read_txt(self, os.path.join(base_dir, "imu_data.txt"))
         self.t_imu = sim_functions.get_column(self.data, 0)
         self.ax = sim_functions.get_column(self.data, 8)
         self.ay = sim_functions.get_column(self.data, 9)
         self.az = sim_functions.get_column(self.data, 10)
-
         self.imu_index = 0
 
 
@@ -40,15 +37,20 @@ class SIM_IMU(Node):
                 self.get_logger().info("Rebooting IMU Simulator")
                 self.imu_index = 0
 
-            msg = Vector3()
-            msg.x = float(self.ax[self.imu_index])
-            msg.y = float(self.ay[self.imu_index])
-            msg.z = float(self.az[self.imu_index])
-            self.IMU_publisher.publish(msg)
+            time = msg.stamp.sec + msg.stamp.nanosec*1e-09
+            self.get_logger().info(f"IMU data event with time {time}")
+
+            imu_msg = Vector3()
+            imu_msg.x = float(self.ax[self.imu_index])
+            imu_msg.y = float(self.ay[self.imu_index])
+            imu_msg.z = float(self.az[self.imu_index])
+            self.IMU_publisher.publish(imu_msg)
+
             kf = KalmanPredict()
-            kf.imu.x = msg.x; kf.imu.y = msg.y; kf.imu.z = msg.z
-            
-            self.get_logger().info(f'Publishing IMU_Data [t={self.t_imu[self.imu_index]}]: [{msg.x}, {msg.y}, {msg.z}]')
+            kf.imu.x = imu_msg.x; kf.imu.y = imu_msg.y; kf.imu.z = imu_msg.z
+            self.KalmanPublisher.publish(kf)
+
+            self.get_logger().info(f'Publishing IMU_Data [t={self.t_imu[self.imu_index]}]: [{imu_msg.x}, {imu_msg.y}, {imu_msg.z}]')
             self.imu_index += 1
 
 

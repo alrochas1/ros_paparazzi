@@ -70,7 +70,6 @@ class SIM_Kalman(Node):
         ]).reshape(-1, 1)
 
 
-
     # Modelo de observación
     def h(self, X):
         return X

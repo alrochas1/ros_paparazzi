@@ -18,9 +18,9 @@ or_x = gcs_data.origin[0]; or_y = gcs_data.origin[1]
 
 # For the filter
 R2_IMU = 2.5e-4 # Varianza de la IMU
-RP = 0.05          # Varianza de la Posición del GPS
-RV = 1          # Varianza de la Velocidad del GPS
-RT = 10         # Varianza de la Actitud
+RP = 0.01          # Varianza de la Posición del GPS
+RV = 0.01          # Varianza de la Velocidad del GPS
+RT = 1         # Varianza de la Actitud
 
 
 class SIM_Kalman(Node):

@@ -36,11 +36,9 @@ class SIM_Kalman(Node):
 
     def kalman_init(self):
 
-        dt = 0.3
         rho = R2_IMU # * pow(dt, 4)
 
         self.Q = np.eye(5) * rho
-        self.R = np.eye(5) * 0.1
         self.P = np.eye(5) * 100
         self.H = np.eye(5)
         self.R = np.matrix([
@@ -53,7 +51,6 @@ class SIM_Kalman(Node):
 
         self.X = np.zeros((5, 1))
         self.Y = np.zeros((5, 1))
-
 
 
     # Modelo dinámico no lineal
@@ -89,6 +86,9 @@ class SIM_Kalman(Node):
             [0, 0, 0, 1, +(np.cos(theta) * ax - np.sin(theta) * ay) * dt],
             [0, 0, 0, 0, 1]
         ])
+        self.get_logger().debug(f"Test F[2][4] = {-(np.sin(theta) * ax + np.cos(theta) * ay) * dt}")
+
+        # H es la identidad
 
         return F
     
@@ -97,7 +97,7 @@ class SIM_Kalman(Node):
         # dt = 0.008    # Provisional
 
         dt = msg.dt
-        self.get_logger().info(f"dt = {dt}")
+        self.get_logger().debug(f"dt = {dt}")
         ax = msg.imu.x / 1024.0
         ay = msg.imu.y / 1024.0
         az = msg.imu.y / 1024.0
@@ -108,19 +108,17 @@ class SIM_Kalman(Node):
 
         F = self.jacobian_F(self.X, U, dt)
         self.P = F @ self.P @ F.T + self.Q
-        # self.publish_state()
 
     def kalman_update(self, msg):
 
         x, y = geo_tools.wgs84_to_ltp(or_x, or_y, msg.latitude, msg.longitude)
-        # CAMBIAR TODO ESTO
+        # CAMBIAR TODO ESTO ?? (no se porque puse esto)
         vx = msg.gps_speed.x; vy = msg.gps_speed.y
         self.Y[0] = float(x)
         self.Y[1] = float(y)
         self.Y[2] = float(vx)
         self.Y[3] = float(vy)
         self.Y[4] = msg.theta
-
 
         # K = PH^T(HPH^T + R)^-1
         S = self.H @ self.P @ self.H.T + self.R
@@ -148,6 +146,9 @@ class SIM_Kalman(Node):
 
         self.Kalman_publisher.publish(state) 
         self.get_logger().info(f'Publishing Telemetry_Data: [{state.gps.latitude:.7f}, {state.gps.longitude:.7f}]')
+
+        # TEST
+        self.get_logger().info(f"Theta = {self.X[4]}")
 
 
 def main(args=None):

@@ -5,7 +5,7 @@
 import rclpy
 from rclpy.node import Node
 
-from ros_paparazzi_interfaces.msg import Waypoint
+from ros_paparazzi_interfaces.msg import Waypoint, KalmanUpdate, KalmanPredict 
 from sensor_msgs.msg import NavSatFix
 from geometry_msgs.msg import Vector3
 
@@ -18,21 +18,22 @@ import numpy as np
 # For the filter
 # R2_IMU = 2.5e-4
 R2_IMU = 2.5e-4
+R2_GPS = 0.01
 
 or_x = gcs_data.origin[0]; or_y = gcs_data.origin[1]
 
 class SIM_Kalman(Node):
 
+
     def __init__(self):
-        super().__init__('SIM_Kalman')
+        super().__init__('SIM_Linear_Kalman')
 
         self.Kalman_publisher = self.create_publisher(Waypoint, 'waypoints/telemetry_gps', 10)
-        self.IMU_subscription = self.create_subscription(Vector3, 'sensors/imu', self.kalman_predict, 10)
-        self.GPS_subscription = self.create_subscription(NavSatFix, 'sensors/gps', self.kalman_update, 10)
-        self.GPS_subscription = self.create_subscription(Vector3, 'sensors/gps/speed', self.update_speed, 10)
-        self.ATTITUDE_subscription = self.create_subscription(Vector3, 'sensors/attitude', self.update_theta, 10)
+        self.PREDICT_subscription = self.create_subscription(KalmanPredict, 'kalman/predict', self.kalman_predict, 10)
+        self.UPDATE_subscription = self.create_subscription(KalmanUpdate, 'kalman/update', self.kalman_update, 10)
 
         self.kalman_init()
+
 
 
     def kalman_init(self):
@@ -53,7 +54,7 @@ class SIM_Kalman(Node):
         self.C = np.eye(4)
 
         self.Q = np.eye(4)*rho
-        self.R = np.eye(4)*0.001
+        self.R = np.eye(4)*R2_GPS
         self.P = np.eye(4)*500
 
         self.X = np.zeros((4, 1))
@@ -65,13 +66,25 @@ class SIM_Kalman(Node):
 
     def kalman_predict(self, msg):
         # Calculo de X = Ax + Bu
-        axc = msg.x / 1024.0
-        ayc = msg.y / 1024.0
+        dt = msg.dt
+        self.get_logger().debug(f"dt = {dt}")
+
+        axc = msg.imu.x / 1024.0
+        ayc = msg.imu.y / 1024.0
         ax = axc*np.cos(self.Theta) - ayc*np.sin(self.Theta)
         ay = axc*np.sin(self.Theta) + ayc*np.cos(self.Theta)
-        # ax = axc
-        # ay = ayc
+
         U = np.array([[ax], [ay]])
+        self.A = np.matrix([[1, 0, dt,  0],
+              [0, 1,  0, dt],
+              [0, 0,  1,  0],
+              [0, 0,  0,  1]
+        ])
+        self.B = np.matrix([[ 0,  0],
+              [ 0,  0],
+              [dt,  0],
+              [ 0, dt]
+        ])
         tmp1 = np.matmul(self.A, self.X)
         tmp2 = np.matmul(self.B, U)
 
@@ -97,6 +110,9 @@ class SIM_Kalman(Node):
         x, y = geo_tools.wgs84_to_ltp(or_x, or_y, msg.latitude, msg.longitude)
         self.Y[0] = float(x)
         self.Y[1] = float(y)
+        self.Y[2] = float(msg.gps_speed.x)
+        self.Y[3] = float(msg.gps_speed.y)
+        self.Theta = msg.theta
         tmp1 = np.matmul(self.C, self.X)
         tmp2 = self.Y - tmp1
         tmp1 = np.matmul(self.K, tmp2)
@@ -109,14 +125,6 @@ class SIM_Kalman(Node):
         tmp1 = I - np.matmul(self.K, self.C)
         self.P = np.matmul(tmp1, self.P)
         print(f'Y = {self.Y}')
-
-
-    def update_speed(self, msg):
-        self.Y[2] = msg.x
-        self.Y[3] = msg.y
-
-    def update_theta(self, msg):
-        self.Theta = msg.y
 
 
     def publish_state(self):

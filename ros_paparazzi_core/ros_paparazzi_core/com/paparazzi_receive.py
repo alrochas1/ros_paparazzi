@@ -12,6 +12,7 @@ PPZ_START_BYTE = 0x50  # "P"
 COM_START_BYTE = 0x52  # "R"
 PPZ_SONAR_BYTE = 0x53  # "S"
 PPZ_TELEMETRY_BYTE = 0x54  # "T"
+PPZ_PERIODIC_BYTE = 0X42  # "B"
 PPZ_HOME_BYTE = 0x48 # "H"
 PPZ_IMU_BYTE = 0x49  # "I"
 PPZ_MEASURE_BYTE = 0x4D  # "M"
@@ -96,13 +97,12 @@ class PPZI_TELEMETRY(threading.Thread):
     def __init__(self, port='/dev/ttyUSB0'):
         super().__init__()
         self.port = port
-        self.baud_rate = 9600
+        self.baud_rate = 115200
         self.ser = None
 
     def run(self):
         # Setup conexion serie
         fd = serial.Serial(self.port, self.baud_rate, timeout=1)
-        # fd = serial.Serial("/dev/ttyUSB0", 9600, timeout=1)
             
         while True:
             data_av = fd.in_waiting
@@ -114,6 +114,8 @@ class PPZI_TELEMETRY(threading.Thread):
                 datappzz = fd.read(data_av).strip().hex()
                 datappzz = [datappzz[i:i+2] for i in range(0, len(datappzz), 2)]
                 datappzz = [int(byte, 16) for byte in datappzz]
+
+                print(f"[PPZI_RECEIVE] - Mensaje Completo: {datappzz}")
 
                 # Añadido el len porque daba un error si solo llegaba un byte
                 if len(datappzz) < 2 or datappzz[0] != PPZ_START_BYTE:
@@ -268,7 +270,6 @@ class PPZI_TELEMETRY(threading.Thread):
                     # autopilot_data.telemetry_data = [longitud, latitud, altitud, d_sonar, c_sonar]  # TERMINAR
                     autopilot_data.home_data.update(autopilot_data.tiempo, longitud, latitud, altitud, 1)
                     print(f"([PPZI_RECEIVE] - Nueva posición de HOME: {autopilot_data.home_data}")
-
 
 
                 if datappzz[1] == PPZ_IMU_BYTE:

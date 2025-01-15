@@ -27,7 +27,7 @@ class PPZI_DATALINK(threading.Thread):
     def __init__(self, port='/dev/ttyUSB0'):
         super().__init__()
         self.port = port
-        self.baud_rate = 9600
+        self.baud_rate = 115200
         self.ser = None
 
 

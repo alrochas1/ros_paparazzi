@@ -123,31 +123,15 @@ class PPZI_TELEMETRY(threading.Thread):
                 for i, byte in enumerate(datappzz):
                     if byte == 10:  # Salto de Linea
                         messages.append(message)
-                        # print(f"[PPZI_RECEIVE] - Mensaje Fragmentado: {message}")
                         message = []
                     else:
                         message.append(byte)
                         if i == (len(datappzz) - 1):
                             messages.append(message)
-                            # print(f"[PPZI_RECEIVE] - Mensaje Fragmentado: {message}")
                             message = []
 
-                    
-
-
-                # # print(f"[PPZI_RECEIVE] - Mensaje Completo: {datappzz}")
-                # messages = datappzz.split(b'\n')
-
-                # raw_data = fd.read(data_av)
-                # messages = raw_data.split(b'\n')
 
                 for message in messages:
-
-                    # Ajustes para leer bien
-                    # message = message.strip().hex()
-                    # message = [message[i:i+2] for i in range(0, len(message), 2)]
-                    
-                    # message = [int(byte, 16) for byte in message]
 
                     # Ignorar mensajes vacíos
                     if len(message) == 0:
@@ -196,8 +180,6 @@ class PPZI_TELEMETRY(threading.Thread):
 
                         c_sonar = int(message[22])
 
-                        # print(f"Longitud: {longitud}, Latitud: {latitud}, Altitud: {altitud}, D_Sonar: {d_sonar}, C_Sonar: {c_sonar}, Checksum: {checksumppzz}")
-                        # autopilot_data.telemetry_data = [longitud, latitud, altitud, d_sonar, c_sonar]  # TERMINAR
                         autopilot_data.telemetry_data.update(autopilot_data.tiempo, longitud, latitud, altitud, 0)
                         print(f"([PPZI_RECEIVE] - Nuevo dato de telemetría: {autopilot_data.telemetry_data}")         
 

@@ -82,7 +82,7 @@ class SIM_CORE(Node):
         imu_msg = Vector3()
         imu_msg.x = float(self.ax[self.imu_index])
         imu_msg.y = float(self.ay[self.imu_index])
-        imu_msg.z = float(self.az[self.imu_index])
+        imu_msg.z = float(self.wz[self.imu_index])
         self.IMU_publisher.publish(imu_msg)
 
         kf = KalmanPredict()
@@ -152,7 +152,7 @@ class SIM_CORE(Node):
         self.t_imu = sim_functions.get_column(self.data, 0)
         self.ax = sim_functions.get_column(self.data, 8)
         self.ay = sim_functions.get_column(self.data, 9)
-        self.az = sim_functions.get_column(self.data, 10)
+        self.wz = sim_functions.get_column(self.data, 7)
         self.imu_index = 0
 
 

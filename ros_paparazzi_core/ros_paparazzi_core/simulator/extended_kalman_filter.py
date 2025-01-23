@@ -55,7 +55,7 @@ class SIM_Kalman(Node):
 
     # Modelo dinámico no lineal
     def f(self, X, U, dt):
-        ax, ay, az = U[0], U[1], U[2]
+        ax, ay, wz = U[0], U[1], U[2]
         theta = X[4]
 
         return np.array([
@@ -63,7 +63,7 @@ class SIM_Kalman(Node):
             X[1] + X[3] * dt,
             X[2] + (np.cos(theta) * ax - np.sin(theta) * ay) * dt,
             X[3] + (np.sin(theta) * ax + np.cos(theta) * ay) * dt,
-            X[4] + az * dt
+            X[4] + wz * dt
         ]).reshape(-1, 1)
 
 
@@ -100,7 +100,7 @@ class SIM_Kalman(Node):
         self.get_logger().debug(f"dt = {dt}")
         ax = msg.imu.x / 1024.0
         ay = msg.imu.y / 1024.0
-        az = msg.imu.y / 1024.0
+        az = msg.imu.y / 1024.0     # Esto realmente es wz
         U = np.array([ax, ay, az])
 
         # Predicción del estado: X = f(X, U)

@@ -8,7 +8,7 @@ from rclpy.node import Node
 
 from ros_paparazzi_interfaces.msg import Waypoint
 from geometry_msgs.msg import Vector3
-from sensor_msgs.msg import NavSatFix
+from sensor_msgs.msg import NavSatFix, LaserScan
 
 from ros_paparazzi_core.data import autopilot_data
 from ros_paparazzi_core.com.paparazzi_receive import PPZI_TELEMETRY, TIME_THREAD
@@ -37,6 +37,7 @@ class Raspy_Publisher(Node):
         self.suscriber = self.create_subscription(Waypoint, 'waypoints/datalink', self.waypoint_callback, 10)
         self.IMU_publisher = self.create_publisher(Vector3, 'sensors/imu', 10)
         self.GPS_publisher = self.create_publisher(NavSatFix, 'sensors/gps', 10)
+        self.LiDaR_publisher = self.create_publisher(LaserScan, 'sensors/lidar', 10)
 
         self.create_monitor_threads()
         
@@ -50,10 +51,12 @@ class Raspy_Publisher(Node):
         self.last_home_data = None
         self.last_imu_data = None
         self.last_gps_data = None
+        self.last_lidar_data = None
         self.start_monitor_thread(autopilot_data.telemetry_data, self.telemetry_callback, self.last_telemetry_data)
         self.start_monitor_thread(autopilot_data.home_data, self.telemetry_callback, self.last_home_data)
         self.start_monitor_thread(autopilot_data.imu_data, self.imu_callback, self.last_imu_data)
         self.start_monitor_thread(autopilot_data.gps_data, self.gps_callback, self.last_gps_data)
+        self.start_monitor_thread(autopilot_data.lidar_data, self.lidar_callback, self.last_lidar_data)
 
     # Funcion que manda los mensajes datalink por el puerto serie cuando los recibe del topic
     def waypoint_callback(self, msg):
@@ -108,6 +111,17 @@ class Raspy_Publisher(Node):
 
         self.GPS_publisher.publish(msg)
         self.get_logger().info(f'Publishing GPS_Data: [{msg.latitude}, {msg.longitude}]')
+
+    
+    def gps_callback(self, data):
+
+        msg = LaserScan()
+        msg.ranges = {data.dist}
+        msg.range_min = 0.1
+        msg.range_max = 12
+
+        self.LiDaR_publisher.publish(msg)
+        self.get_logger().info(f'Publishing LIDAR_Data: {msg.ranges} m')
         
 
 

@@ -80,6 +80,20 @@ class GPS_Data():
 
     def __repr__(self):
         return f"WaypointData(Latitud={self.lat}, Longitud={self.lon}, Altitud={self.alt}"
+    
+
+class Lidar_Data():
+    def __init__(self):
+        self.dist = 0
+
+    def update(self, dist):
+        self.dist = float(dist)
+
+    def recover(self):
+        return [self.dist]
+
+    def __repr__(self):
+        return f"LidarData = {self.dist} m"
 
     
 
@@ -90,4 +104,5 @@ waypoint_data = WaypointData()      # For sending Waypoints to the AP
 home_data = TelemetryData()         # For sending the HOME position to the computer
 imu_data = IMU_Data()
 gps_data = GPS_Data()
+lidar_data = Lidar_Data()
 

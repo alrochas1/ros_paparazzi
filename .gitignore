@@ -21,3 +21,5 @@ log/
 ./ros_paparazzi_interfaces/ros_paparazzi_interfaces/core
 
 ./data_WGS.txt
+
+./core

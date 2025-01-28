@@ -3,6 +3,7 @@ import time
 import math
 import time
 import threading
+import struct
 
 from ros_paparazzi_core.data import autopilot_data
 
@@ -17,6 +18,7 @@ PPZ_HOME_BYTE = 0x48 # "H"
 PPZ_IMU_BYTE = 0x49  # "I"
 PPZ_MEASURE_BYTE = 0x4D  # "M"
 PPZ_GPS_BYTE = 0x47  # "G"
+PPZ_LIDAR_BYTE = 0x4C; # "L"
 COM_FINAL_BYTE = 0x46  # "F"
 COM_ANSWER_BYTE = 0x4F  # "O"
 COM_NO_MEASURE_BYTE = 0x4E  # "N"
@@ -26,7 +28,7 @@ COM_VUELTA_BYTE = 0x56  # "V"
 POSITIVO = 0x00  # Positive sign
 NEGATIVO = 0x01  # Negative sign
 
-RECEIVE_INTERVAL = 5e-02  # Intervalo en el que comprueba si llega un mensaje
+RECEIVE_INTERVAL = 1e-02  # Intervalo en el que comprueba si llega un mensaje
 
 
 # Función para pasar enteros a hexadecimal
@@ -46,7 +48,15 @@ def serial_byteToint(byte_array, length):
     while i >= 0:
         num |= byte_array[i] << (8 * i)
         i -= 1
-    return num  
+    return num
+
+
+# Funcion para pasar bytes a floats
+def serial_byteTofloat(byte_array):
+
+    byte_array = byte_array[:4]
+    return struct.unpack('<f', bytes(byte_array))[0]
+  
 
 # Función para comprobar checksum
 def compare_checksum(message, check, l_message):
@@ -353,6 +363,27 @@ class PPZI_TELEMETRY(threading.Thread):
                         autopilot_data.gps_data.update(gps_lat, gps_lon, gps_alt)
                         print(f"[PPZG_RECEIVE] - GPS Data: Lat:{gps_lat}, Lon:{gps_lon}, Alt:{gps_alt}")
 
+
+                    elif message[1] == PPZ_LIDAR_BYTE:
+                        if len(message) != 11:
+                            print(f"[PPZG_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 11, Received {len(message)}")
+                            time.sleep(RECEIVE_INTERVAL)
+                            continue
+
+                        hex_checksumppzz = [message[10], message[9]]
+                        checksumppzz = serial_byteToint(hex_checksumppzz, 2)
+
+                        # TODO: Solve checksum issue
+                        # if not compare_checksum(message, checksumppzz, data_av):
+                        #     print("[PPZG_RECEIVE] - Checksum erróneo.")
+                        #     time.sleep(RECEIVE_INTERVAL)
+                        #     continue
+
+                        lidar_dist = [message[4], message[5], message[6], message[7]]
+                        lidar_dist = serial_byteTofloat(lidar_dist)
+
+                        autopilot_data.lidar_data.update(lidar_dist)
+                        print(f"[PPZG_RECEIVE] - LiDaR Data: Distancia = {lidar_dist}")
 
                     else:
                         print(f"[PPZG_RECEIVE] - Message not recognized")

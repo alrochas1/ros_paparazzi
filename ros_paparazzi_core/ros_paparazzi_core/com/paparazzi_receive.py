@@ -155,12 +155,12 @@ class PPZI_TELEMETRY(threading.Thread):
                     
 
                     if message[1] == PPZ_TELEMETRY_BYTE:
-                        if len(message) != 25:
-                            print(f"[PPZI_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 25, Received {len(message)}")
+                        if len(message) != 26:
+                            print(f"[PPZI_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 26, Received {len(message)}")
                             time.sleep(RECEIVE_INTERVAL)
                             continue
 
-                        hex_checksumppzz = [message[24], message[23]]
+                        hex_checksumppzz = [message[25], message[24]]
                         checksumppzz = serial_byteToint(hex_checksumppzz, 2)
 
                         # TODO: Solve checksum issue
@@ -180,15 +180,15 @@ class PPZI_TELEMETRY(threading.Thread):
                         latitud = calculate_signo(sign_lat) * serial_byteToint(hex_lat, 4)
 
                         # Temporalmente voy a quitar la altitud
-                        # sign_alt = datappzz[14]
-                        # hex_alt = [datappzz[17], datappzz[16], datappzz[15]]
-                        # altitud = calculate_signo(sign_alt) * serial_byteToint(hex_alt, 3)
-                        altitud = 650000
+                        sign_alt = datappzz[14]
+                        hex_alt = [datappzz[18], datappzz[17], datappzz[16], datappzz[15]]    # Esta por ahora es la actitud
+                        altitud = calculate_signo(sign_alt) * serial_byteToint(hex_alt, 4)
+                        # altitud = 650000
 
-                        hex_d_sonar = [message[21], message[20], message[19], message[18]]
+                        hex_d_sonar = [message[22], message[21], message[20], message[19]]
                         d_sonar = serial_byteToint(hex_d_sonar, 4)
 
-                        c_sonar = int(message[22])
+                        c_sonar = int(message[23])
 
                         autopilot_data.telemetry_data.update(autopilot_data.tiempo, longitud, latitud, altitud, 0)
                         print(f"([PPZI_RECEIVE] - Nuevo dato de telemetría: {autopilot_data.telemetry_data}")         

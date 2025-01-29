@@ -78,7 +78,7 @@ class Raspy_Publisher(Node):
         msg.gps.header.stamp.nanosec = int(1e+9*(autopilot_data.tiempo - int(autopilot_data.tiempo)))
         msg.gps.longitude = float(data.longitude*1e-07)
         msg.gps.latitude = float(data.latitude*1e-07)
-        msg.gps.altitude = float(data.altitude/1000.0)
+        msg.gps.altitude = float(data.altitude*1e-07)
         msg.wp_id = int(data.wp_id)
         self.telemetry_publisher.publish(msg)
         self.get_logger().info(f'Publishing Telemetry_Data[{msg.wp_id}]: [{msg.gps.latitude:.7f}, {msg.gps.longitude:.7f}, {msg.gps.altitude:.2f}]')

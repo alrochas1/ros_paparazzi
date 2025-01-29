@@ -181,6 +181,8 @@ class PPZI_TELEMETRY(threading.Thread):
 
                         # Temporalmente voy a quitar la altitud
                         sign_alt = datappzz[14]
+                        if sign_alt != 0 and sign_alt != 1:
+                            sign_alt = 0
                         hex_alt = [datappzz[18], datappzz[17], datappzz[16], datappzz[15]]    # Esta por ahora es la actitud
                         altitud = calculate_signo(sign_alt) * serial_byteToint(hex_alt, 4)
                         # altitud = 650000

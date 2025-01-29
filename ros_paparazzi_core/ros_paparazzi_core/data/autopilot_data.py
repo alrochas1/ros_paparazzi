@@ -8,6 +8,7 @@ class TelemetryData():
         self.latitude = 0.0
         self.altitude = 0.0
         self.wp_id = 0
+        self.callbacks = []
 
     def update(self, time, longitude, latitude, altitude, wp_id):
         self.time = time
@@ -15,6 +16,14 @@ class TelemetryData():
         self.latitude = latitude
         self.altitude = altitude
         self.wp_id = wp_id
+        self.send_callback()
+
+    def send_callback(self):
+        for callback in self.callbacks:
+            callback(self)
+
+    def register_callback(self, callback):
+        self.callbacks.append(callback)
 
     def recover(self):
         return [self.time, self.longitude, self.latitude, self.altitude, self.wp_id]
@@ -50,12 +59,21 @@ class IMU_Data():
         self.y = 0
         self.z = 0
         self.time = 0.0
+        self.callbacks = []
 
     def update(self, time, x, y, z):
         self.x = int(x)
         self.y = int(y)
         self.z = int(z)
         self.time = time
+        self.send_callback()
+
+    def send_callback(self):
+        for callback in self.callbacks:
+            callback(self)
+
+    def register_callback(self, callback):
+        self.callbacks.append(callback)
 
     def recover(self):
         return [self.x, self.y, self.z]
@@ -69,11 +87,20 @@ class GPS_Data():
         self.lat = 0
         self.lon = 0
         self.alt = 0
+        self.callbacks = []
 
     def update(self, lat, lon, alt):
         self.lat = int(lat)
         self.lon = int(lon)
         self.alt = int(alt)
+        self.send_callback()
+
+    def send_callback(self):
+        for callback in self.callbacks:
+            callback(self)
+
+    def register_callback(self, callback):
+        self.callbacks.append(callback)
 
     def recover(self):
         return [self.lat, self.lon, self.alt]
@@ -84,16 +111,25 @@ class GPS_Data():
 
 class Lidar_Data():
     def __init__(self):
-        self.dist = 0
+        self.distance = 0
+        self.callbacks = []
 
     def update(self, dist):
-        self.dist = float(dist)
+        self.distance = float(dist)
+        self.send_callback()
 
     def recover(self):
-        return [self.dist]
+        return [self.distance]
+    
+    def send_callback(self):
+        for callback in self.callbacks:
+            callback(self)
+
+    def register_callback(self, callback):
+        self.callbacks.append(callback)
 
     def __repr__(self):
-        return f"LidarData = {self.dist} m"
+        return f"LidarData = {self.distance} m"
 
     
 

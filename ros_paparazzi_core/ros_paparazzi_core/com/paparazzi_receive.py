@@ -125,7 +125,7 @@ class PPZI_TELEMETRY(threading.Thread):
                 datappzz = [datappzz[i:i+2] for i in range(0, len(datappzz), 2)]
                 datappzz = [int(byte, 16) for byte in datappzz]
 
-                print(f"[PPZI_RECEIVE] - Mensaje Completo: {datappzz}")
+                # print(f"[PPZI_RECEIVE] - Mensaje Completo: {datappzz}")
                 
                 # Parte el mensaje
                 messages = []

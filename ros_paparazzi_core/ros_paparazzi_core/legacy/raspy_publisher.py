@@ -39,18 +39,24 @@ class Raspy_Publisher(Node):
         self.GPS_publisher = self.create_publisher(NavSatFix, 'sensors/gps', 10)
         self.LiDaR_publisher = self.create_publisher(LaserScan, 'sensors/lidar', 10)
 
-        autopilot_data.telemetry_data.register_callback(self.telemetry_callback)
-        autopilot_data.imu_data.register_callback(self.imu_callback)
-        autopilot_data.gps_data.register_callback(self.gps_callback)
-        autopilot_data.lidar_data.register_callback(self.lidar_callback)
-
-        # self.create_monitor_threads()
+        self.create_monitor_threads()
         
         # Clase para mandar datos por el puerto serie (datalink)
         self.paparazzi_send = PPZI_DATALINK(PORT)
         self.paparazzi_send.run()
 
 
+    def create_monitor_threads(self):    
+        self.last_telemetry_data = None
+        self.last_home_data = None
+        self.last_imu_data = None
+        self.last_gps_data = None
+        self.last_lidar_data = None
+        self.start_monitor_thread(autopilot_data.telemetry_data, self.telemetry_callback, self.last_telemetry_data)
+        self.start_monitor_thread(autopilot_data.home_data, self.telemetry_callback, self.last_home_data)
+        self.start_monitor_thread(autopilot_data.imu_data, self.imu_callback, self.last_imu_data)
+        self.start_monitor_thread(autopilot_data.gps_data, self.gps_callback, self.last_gps_data)
+        self.start_monitor_thread(autopilot_data.lidar_data, self.lidar_callback, self.last_lidar_data)
 
     # Funcion que manda los mensajes datalink por el puerto serie cuando los recibe del topic
     def waypoint_callback(self, msg):
@@ -73,6 +79,7 @@ class Raspy_Publisher(Node):
 
     # Funcion que publica en el topic los mensajes telemetry que recibe por el puerto serie
     def telemetry_callback(self, data):
+        # data = [float(i) for i in data] # Hay que convertir los datos a Float64, que es lo que acepta NatSat
         msg = Waypoint()
         msg.gps.header.stamp.sec = int(autopilot_data.tiempo)
         msg.gps.header.stamp.nanosec = int(1e+9*(autopilot_data.tiempo - int(autopilot_data.tiempo)))
@@ -109,7 +116,7 @@ class Raspy_Publisher(Node):
     def lidar_callback(self, data):
 
         msg = LaserScan()
-        msg.ranges = [float(data.distance)]
+        msg.ranges = data.distance
         msg.range_min = 0.1
         msg.range_max = 12.0
 
@@ -117,6 +124,34 @@ class Raspy_Publisher(Node):
         self.get_logger().info(f'Publishing LIDAR_Data: {data.distance} m')
         
 
+
+
+    # Función para iniciar un hilo de monitoreo genérico
+    def start_monitor_thread(self, variable, callback, last_value):
+        monitor_thread = threading.Thread(
+            target=self.monitor_variable, args=(variable, callback, last_value), daemon=True
+        )
+        monitor_thread.start()
+
+
+    # Función genérica para monitorear cambios en cualquier variable
+    def monitor_variable(self, variable, callback, last_value):
+        
+        # last_value = self.last_telemetry_data
+
+        while True:
+            current_value = variable.recover()
+            
+            if last_value is None:
+                last_value = current_value
+
+            if current_value != last_value:
+                last_value = current_value
+                callback(variable)
+
+            time.sleep(0.01)
+
+    
 
 
 def main(args=None):

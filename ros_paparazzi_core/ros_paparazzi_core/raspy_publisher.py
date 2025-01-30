@@ -110,11 +110,12 @@ class Raspy_Publisher(Node):
 
         msg = LaserScan()
         msg.ranges = [float(data.distance)]
+        msg.angle_increment = float(data.angle)
         msg.range_min = 0.1
         msg.range_max = 12.0
 
         self.LiDaR_publisher.publish(msg)
-        self.get_logger().info(f'Publishing LIDAR_Data: {data.distance} m')
+        self.get_logger().info(f'Publishing LIDAR_Data: {data.distance} m, Angle: {data.angle}º')
         
 
 

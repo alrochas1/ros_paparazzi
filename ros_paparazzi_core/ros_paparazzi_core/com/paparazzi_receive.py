@@ -367,12 +367,12 @@ class PPZI_TELEMETRY(threading.Thread):
 
 
                     elif message[1] == PPZ_LIDAR_BYTE:
-                        if len(message) != 11:
-                            print(f"[PPZG_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 11, Received {len(message)}")
+                        if len(message) != 14:
+                            print(f"[PPZG_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 14, Received {len(message)}")
                             time.sleep(RECEIVE_INTERVAL)
                             continue
 
-                        hex_checksumppzz = [message[10], message[9]]
+                        hex_checksumppzz = [message[13], message[12]]
                         checksumppzz = serial_byteToint(hex_checksumppzz, 2)
 
                         # TODO: Solve checksum issue
@@ -384,7 +384,10 @@ class PPZI_TELEMETRY(threading.Thread):
                         lidar_dist = [message[4], message[5], message[6], message[7]]
                         lidar_dist = serial_byteTofloat(lidar_dist)
 
-                        autopilot_data.lidar_data.update(lidar_dist)
+                        lidar_ang = [message[8], message[9], message[10], message[11]]
+                        lidar_ang = serial_byteTofloat(lidar_ang)
+
+                        autopilot_data.lidar_data.update(lidar_dist, lidar_ang)
                         print(f"[PPZG_RECEIVE] - LiDaR Data: Distancia = {lidar_dist}")
 
                     else:

@@ -112,14 +112,16 @@ class GPS_Data():
 class Lidar_Data():
     def __init__(self):
         self.distance = 0
+        self.angle = 0
         self.callbacks = []
 
-    def update(self, dist):
+    def update(self, dist, ang):
         self.distance = float(dist)
+        self.angle = float(ang)
         self.send_callback()
 
     def recover(self):
-        return [self.distance]
+        return [self.distance, self.angle]
     
     def send_callback(self):
         for callback in self.callbacks:
@@ -129,7 +131,7 @@ class Lidar_Data():
         self.callbacks.append(callback)
 
     def __repr__(self):
-        return f"LidarData = {self.distance} m"
+        return f"LidarData = {self.distance} m, Angulo = {self.angle} º"
 
     
 

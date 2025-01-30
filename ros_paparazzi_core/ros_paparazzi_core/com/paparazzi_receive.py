@@ -4,6 +4,7 @@ import math
 import time
 import threading
 import struct
+import logging
 
 from ros_paparazzi_core.data import autopilot_data
 
@@ -94,7 +95,7 @@ class TIME_THREAD(threading.Thread):
         while self.running:
             time.sleep(self.interval)
             autopilot_data.tiempo += self.interval
-            # print(f"Tiempo: {autopilot_data.tiempo:.2f} s")  # Para verificar el incremento
+            # self.logger().debug(f"Tiempo: {autopilot_data.tiempo:.2f} s")  # Para verificar el incremento
 
     def stop(self):
         self.running = False
@@ -110,6 +111,9 @@ class PPZI_TELEMETRY(threading.Thread):
         self.baud_rate = 115200
         self.ser = None
 
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        self.logger = logging.getLogger(__name__)
+
     def run(self):
         # Setup conexion serie
         fd = serial.Serial(self.port, self.baud_rate, timeout=1)
@@ -118,14 +122,14 @@ class PPZI_TELEMETRY(threading.Thread):
             data_av = fd.in_waiting
   
             if data_av > 0:
-                print(f"\n[PPZI_RECEIVE] - Número bytes: {data_av}")
+                self.logger.debug(f"\n[PPZI_RECEIVE] - Número bytes: {data_av}")
                 # Todo esto es para convertir los datos leidos al formato 
                 # que se usaba en el codigo en C
                 datappzz = fd.read(data_av).strip().hex()
                 datappzz = [datappzz[i:i+2] for i in range(0, len(datappzz), 2)]
                 datappzz = [int(byte, 16) for byte in datappzz]
 
-                # print(f"[PPZI_RECEIVE] - Mensaje Completo: {datappzz}")
+                # self.logger.debug(f"[PPZI_RECEIVE] - Mensaje Completo: {datappzz}")
                 
                 # Parte el mensaje
                 messages = []
@@ -149,14 +153,14 @@ class PPZI_TELEMETRY(threading.Thread):
 
                     # Añadido el len porque daba un error si solo llegaba un byte
                     if len(message) < 2 or message[0] != PPZ_START_BYTE:
-                        print("[PPZI_RECEIVE] - NO EMPIEZA POR P \n")
+                        self.logger.debug("[PPZI_RECEIVE] - NO EMPIEZA POR P \n")
                         time.sleep(RECEIVE_INTERVAL)
                         continue
                     
 
                     if message[1] == PPZ_TELEMETRY_BYTE:
                         if len(message) != 26:
-                            print(f"[PPZI_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 26, Received {len(message)}")
+                            self.logger.debug(f"[PPZI_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 26, Received {len(message)}")
                             time.sleep(RECEIVE_INTERVAL)
                             continue
 
@@ -165,11 +169,9 @@ class PPZI_TELEMETRY(threading.Thread):
 
                         # TODO: Solve checksum issue
                         # if not compare_checksum(message, checksumppzz, message):
-                        #     print("[PPZI_RECEIVE] - Checksum erróneo.")
+                        #     self.logger.info("[PPZI_RECEIVE] - Checksum TELEMETRY erróneo.")
                         #     time.sleep(RECEIVE_INTERVAL)
                         #     continue
-
-                        # print("TELEMETRIA")
 
                         sign_long = message[4]
                         hex_long = [message[8], message[7], message[6], message[5]]
@@ -193,7 +195,7 @@ class PPZI_TELEMETRY(threading.Thread):
                         c_sonar = int(message[23])
 
                         autopilot_data.telemetry_data.update(autopilot_data.tiempo, longitud, latitud, altitud, 0)
-                        print(f"([PPZI_RECEIVE] - Nuevo dato de telemetría: {autopilot_data.telemetry_data}")         
+                        self.logger.debug(f"([PPZI_RECEIVE] - Nuevo dato de telemetría: {autopilot_data.telemetry_data}")         
 
                         # with open(name_telemetria, "a") as telemetria:
                         #     telemetria.write(f"{time.time()} {datappzz[1]} {longitud} {latitud} {altitud} {d_sonar} {c_sonar}\n")
@@ -201,7 +203,7 @@ class PPZI_TELEMETRY(threading.Thread):
                     # Este no se esta usando
                     elif message[1] == PPZ_MEASURE_BYTE:
                         if len(message) != 26:
-                            print(f"[PPZI_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 26, Received {len(message)}")
+                            self.logger.debug(f"[PPZI_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 26, Received {len(message)}")
                             time.sleep(RECEIVE_INTERVAL)
                             continue
 
@@ -209,11 +211,10 @@ class PPZI_TELEMETRY(threading.Thread):
                         checksumppzz = serial_byteToint(hex_checksumppzz, 2)
 
                         if not compare_checksum(message, checksumppzz, data_av):
-                            print("[PPZI_RECEIVE] - Checksum erróneo.")
+                            self.logger.info("[PPZI_RECEIVE] - Checksum MEASURE erróneo.")
                             time.sleep(RECEIVE_INTERVAL)
                             continue
 
-                        print("MEDIDA")
 
                         sign_long = message[4]
                         hex_long = [message[8], message[7], message[6], message[5]]
@@ -241,9 +242,8 @@ class PPZI_TELEMETRY(threading.Thread):
 
                     # Este no se esta usando
                     elif message[1] == PPZ_SONAR_BYTE:
-                        print(message)
                         if len(message) != 6:
-                            print(f"NÚMERO BYTES INCORRECTO --> Expected 6, Received {len(message)}")
+                            self.logger.debug(f"NÚMERO BYTES INCORRECTO --> Expected 6, Received {len(message)}")
                             time.sleep(RECEIVE_INTERVAL)
                             continue
 
@@ -252,12 +252,12 @@ class PPZI_TELEMETRY(threading.Thread):
 
                         # TODO: Solve checksum issue
                         # if not compare_checksum(message, checksumppzz, data_av):
-                        #     print("Checksum erróneo.")
+                        #     self.logger.info("Checksum SONAR erróneo.")
                         #     time.sleep(RECEIVE_INTERVAL)
                         #     continue
 
-                        print(f"[PPZI_RECEIVE] - Mensaje recibido correctamente por el autopiloto")
-                        print(f"[PPZI_RECEIVE] - Nuevo dato de la sonda -- {message[2:3]}")
+                        self.logger.debug(f"[PPZI_RECEIVE] - Mensaje recibido correctamente por el autopiloto")
+                        self.logger.debug(f"[PPZI_RECEIVE] - Nuevo dato de la sonda -- {message[2:3]}")
 
                         # MENSAJE RESPUESTA A SOLICITUD DE PROFUNDIDAD (esto no se si hace algo con ello)
                         # profundidad = int(datappzz[4])
@@ -271,7 +271,7 @@ class PPZI_TELEMETRY(threading.Thread):
 
                     elif message[1] == PPZ_HOME_BYTE:
                         if len(message) != 20:
-                            print(f"[PPZI_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 20, Received {len(message)}")
+                            self.logger.debug(f"[PPZI_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 20, Received {len(message)}")
                             time.sleep(RECEIVE_INTERVAL)
                             continue
 
@@ -280,11 +280,10 @@ class PPZI_TELEMETRY(threading.Thread):
 
                         # TODO: Solve checksum issue
                         # if not compare_checksum(message, checksumppzz, data_av):
-                        #     print("[PPZI_RECEIVE] - Checksum erróneo.")
+                        #     self.logger.info("[PPZI_RECEIVE] - Checksum HOME erróneo.")
                         #     time.sleep(RECEIVE_INTERVAL)
                         #     continue
 
-                        # print("TELEMETRIA")
 
                         sign_long = message[4]
                         hex_long = [message[8], message[7], message[6], message[5]]
@@ -299,15 +298,13 @@ class PPZI_TELEMETRY(threading.Thread):
                         # altitud = calculate_signo(sign_alt) * serial_byteToint(hex_alt, 3)
                         altitud = 650000      # Hay algún problema con la altitud
 
-                        # print(f"Longitud: {longitud}, Latitud: {latitud}, Altitud: {altitud}, D_Sonar: {d_sonar}, C_Sonar: {c_sonar}, Checksum: {checksumppzz}")
-                        # autopilot_data.telemetry_data = [longitud, latitud, altitud, d_sonar, c_sonar]  # TERMINAR
                         autopilot_data.home_data.update(autopilot_data.tiempo, longitud, latitud, altitud, 1)
-                        print(f"([PPZI_RECEIVE] - Nueva posición de HOME: {autopilot_data.home_data}")
+                        self.logger.debug(f"([PPZI_RECEIVE] - Nueva posición de HOME: {autopilot_data.home_data}")
 
 
                     elif message[1] == PPZ_IMU_BYTE:
                         if len(message) != 21:
-                            print(f"[PPZI_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 21, Received {len(message)}")
+                            self.logger.debug(f"[PPZI_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 21, Received {len(message)}")
                             time.sleep(RECEIVE_INTERVAL)
                             continue
 
@@ -316,7 +313,7 @@ class PPZI_TELEMETRY(threading.Thread):
 
                         # TODO: Solve checksum issue
                         # if not compare_checksum(message, checksumppzz, data_av):
-                        #     print("[PPZI_RECEIVE] - Checksum erróneo.")
+                        #     self.logger.info("[PPZI_RECEIVE] - Checksum IMU erróneo.")
                         #     time.sleep(RECEIVE_INTERVAL)
                         #     continue
 
@@ -333,12 +330,12 @@ class PPZI_TELEMETRY(threading.Thread):
                         accel_z = calculate_signo(sign_z) * serial_byteToint(hex_z, 3)
 
                         autopilot_data.imu_data.update(autopilot_data.tiempo, accel_x, accel_y, accel_z)
-                        print(f"([PPZI_RECEIVE] - {autopilot_data.imu_data}")
+                        self.logger.debug(f"([PPZI_RECEIVE] - {autopilot_data.imu_data}")
 
                     
                     elif message[1] == PPZ_GPS_BYTE:
                         if len(message) != 20:
-                            print(f"[PPZG_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 20, Received {len(message)}")
+                            self.logger.debug(f"[PPZG_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 20, Received {len(message)}")
                             time.sleep(RECEIVE_INTERVAL)
                             continue
 
@@ -347,7 +344,7 @@ class PPZI_TELEMETRY(threading.Thread):
 
                         # TODO: Solve checksum issue
                         # if not compare_checksum(message, checksumppzz, data_av):
-                        #     print("[PPZG_RECEIVE] - Checksum erróneo.")
+                        #     self.logger.debug("[PPZG_RECEIVE] - Checksum GPS erróneo.")
                         #     time.sleep(RECEIVE_INTERVAL)
                         #     continue
 
@@ -363,12 +360,12 @@ class PPZI_TELEMETRY(threading.Thread):
                         gps_alt = serial_byteToint(hex_alt, 4)
 
                         autopilot_data.gps_data.update(gps_lat, gps_lon, gps_alt)
-                        print(f"[PPZG_RECEIVE] - GPS Data: Lat:{gps_lat}, Lon:{gps_lon}, Alt:{gps_alt}")
+                        self.logger.debug(f"[PPZG_RECEIVE] - GPS Data: Lat:{gps_lat}, Lon:{gps_lon}, Alt:{gps_alt}")
 
 
                     elif message[1] == PPZ_LIDAR_BYTE:
                         if len(message) != 14:
-                            print(f"[PPZG_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 14, Received {len(message)}")
+                            self.logger.debug(f"[PPZG_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 14, Received {len(message)}")
                             time.sleep(RECEIVE_INTERVAL)
                             continue
 
@@ -377,7 +374,7 @@ class PPZI_TELEMETRY(threading.Thread):
 
                         # TODO: Solve checksum issue
                         # if not compare_checksum(message, checksumppzz, data_av):
-                        #     print("[PPZG_RECEIVE] - Checksum erróneo.")
+                        #     self.logger.info("[PPZG_RECEIVE] - Checksum LIDAR erróneo.")
                         #     time.sleep(RECEIVE_INTERVAL)
                         #     continue
 
@@ -388,10 +385,10 @@ class PPZI_TELEMETRY(threading.Thread):
                         lidar_ang = serial_byteTofloat(lidar_ang)
 
                         autopilot_data.lidar_data.update(lidar_dist, lidar_ang)
-                        print(f"[PPZG_RECEIVE] - LiDaR Data: Distancia = {lidar_dist}")
+                        self.logger.debug(f"[PPZG_RECEIVE] - LiDaR Data: Distancia = {lidar_dist}")
 
                     else:
-                        print(f"[PPZG_RECEIVE] - Message not recognized")
+                        self.logger.debug(f"[PPZG_RECEIVE] - Message not recognized")
 
 
             time.sleep(RECEIVE_INTERVAL)

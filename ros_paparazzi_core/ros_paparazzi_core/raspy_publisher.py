@@ -124,21 +124,21 @@ def main(args=None):
 
     global paparazzi_send, paparazzi_receive, time_thread
     rclpy.init(args=args)
+    raspy_node = Raspy_Publisher()
 
     # Lanza los hilos
-    paparazzi_time = TIME_THREAD()
+    paparazzi_time = TIME_THREAD(raspy_node.get_logger())
     time_thread = threading.Thread(target=paparazzi_time.run, args=(autopilot_data,))
     time_thread.start()
 
-    paparazzi_receive = PPZI_TELEMETRY(PORT)
+    paparazzi_receive = PPZI_TELEMETRY(raspy_node.get_logger(), PORT)
     receive_thread = threading.Thread(target=paparazzi_receive.run)
     receive_thread.start()
 
     # Lanza el nodo ROS
-    raspy_ros_node = Raspy_Publisher()
-    rclpy.spin(raspy_ros_node)
+    rclpy.spin(raspy_node)
 
-    raspy_ros_node.destroy_node()
+    raspy_node.destroy_node()
     rclpy.shutdown()
 
 

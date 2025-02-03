@@ -86,16 +86,17 @@ def calculate_signo(signo):
  
 # Hilo contador de tiempo
 class TIME_THREAD(threading.Thread):
-    def __init__(self):
+    def __init__(self, logger):
         super().__init__()
         self.interval = 0.05  # Intervalo en segundos
         self.running = True   # Controla el estado del hilo
+        self.logger = logger
 
     def run(self, autopilot_data):
         while self.running:
             time.sleep(self.interval)
             autopilot_data.tiempo += self.interval
-            # self.logger().debug(f"Tiempo: {autopilot_data.tiempo:.2f} s")  # Para verificar el incremento
+            self.logger.debug(f"Tiempo: {autopilot_data.tiempo:.2f} s")  # Para verificar el incremento
 
     def stop(self):
         self.running = False
@@ -105,14 +106,15 @@ class TIME_THREAD(threading.Thread):
 # Hilo de comunicación con Papparazzi
 class PPZI_TELEMETRY(threading.Thread):
 
-    def __init__(self, port='/dev/ttyUSB0'):
+    def __init__(self, logger, port='/dev/ttyUSB0'):
         super().__init__()
         self.port = port
         self.baud_rate = 115200
         self.ser = None
 
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        self.logger = logging.getLogger(__name__)
+        # logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        # self.logger = logging.getLogger(__name__)
+        self.logger = logger
 
     def run(self):
         # Setup conexion serie
@@ -122,7 +124,7 @@ class PPZI_TELEMETRY(threading.Thread):
             data_av = fd.in_waiting
   
             if data_av > 0:
-                self.logger.debug(f"\n[PPZI_RECEIVE] - Número bytes: {data_av}")
+                self.logger.debug(f"[PPZI_RECEIVE] - Número bytes: {data_av}")
                 # Todo esto es para convertir los datos leidos al formato 
                 # que se usaba en el codigo en C
                 datappzz = fd.read(data_av).strip().hex()
@@ -243,7 +245,7 @@ class PPZI_TELEMETRY(threading.Thread):
                     # Este no se esta usando
                     elif message[1] == PPZ_SONAR_BYTE:
                         if len(message) != 6:
-                            self.logger.debug(f"NÚMERO BYTES INCORRECTO --> Expected 6, Received {len(message)}")
+                            self.logger.debug(f"[PPZI_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 6, Received {len(message)}")
                             time.sleep(RECEIVE_INTERVAL)
                             continue
 

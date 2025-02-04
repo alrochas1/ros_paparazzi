@@ -8,6 +8,7 @@ This repository contains two packages:
 
 - **ros_paparazzi_core**: Contains the main Python nodes responsible for subscribing and publishing data to/from the Paparazzi autopilot system.
 - **ros_paparazzi_interfaces**: Defines the custom ROS 2 message and service types used by `ros_paparazzi_core`.
+- **ros_paparazzi_cpp**: Implement the raspberry end in C++. Easier to integrate with other code. 
 
 ## Requirements
 

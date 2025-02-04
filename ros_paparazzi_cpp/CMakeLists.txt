@@ -16,13 +16,12 @@ include_directories(
   include
 )
 
-add_executable(raspy_publisher_C src/raspy_publisher_C.cpp)
+add_executable(raspy_publisher_C src/raspy_publisher_C.cpp include/ros_paparazzi_cpp/com/paparazzi_receive.cpp)
 ament_target_dependencies(raspy_publisher_C rclcpp geometry_msgs sensor_msgs 
   ros_paparazzi_interfaces)
 
-install(TARGETS
-  raspy_publisher_C
-  DESTINATION lib/${ros_paparazzi_cpp})
+install(TARGETS raspy_publisher_C DESTINATION lib/${PROJECT_NAME})
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

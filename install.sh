@@ -12,7 +12,7 @@ fi
 # rosdep isnt necesary (but maybe could be added as an option)
 # rosdep update
 # rosdep install --from-paths src --ignore-src -r -y
-colcon build --packages-select ros_paparazzi_core ros_paparazzi_interfaces
+colcon build --packages-select ros_paparazzi_core ros_paparazzi_interfaces ros_paparazzi_cpp
 
 if [ $? -ne 0 ]; then
   echo "Error: Colcon not found (maybe you need to be in a ROS Docker ??)"

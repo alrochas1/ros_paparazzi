@@ -1,7 +1,7 @@
 # This is the node that will run on the raspberry
 
 import threading
-import time
+# import time
 
 import rclpy
 from rclpy.node import Node

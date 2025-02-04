@@ -4,7 +4,7 @@ import math
 import time
 import threading
 import struct
-import logging
+# import logging
 
 from ros_paparazzi_core.data import autopilot_data
 

@@ -48,22 +48,37 @@ int calculate_signo(int sign) {
 
 // Funcion principal del hilo, lee el puerto serie
 void serial_reader() {
-    // serial::Serial my_serial("/dev/serial0", 115200, serial::Timeout::simpleTimeout(1000));
+    LibSerial::SerialPort my_serial;
+    try {
+        my_serial.Open("/dev/serial0");
 
-    // while (true) {
-    //     if (my_serial.available()) {
-    //         std::vector<uint8_t> buffer(my_serial.available());
-    //         my_serial.read(buffer, buffer.size());
+        my_serial.SetBaudRate(LibSerial::BaudRate::BAUD_115200);
+        my_serial.SetCharacterSize(LibSerial::CharacterSize::CHAR_SIZE_8);
+        my_serial.SetParity(LibSerial::Parity::PARITY_NONE);
+        my_serial.SetStopBits(LibSerial::StopBits::STOP_BITS_1);
+        my_serial.SetFlowControl(LibSerial::FlowControl::FLOW_CONTROL_NONE);
 
-    //         std::lock_guard<std::mutex> lock(data_mutex);
-    //         for (auto byte : buffer) {
-    //             global_data.push_back(byte);
-    //         }
+        std::vector<uint8_t> buffer;
 
-    //         process_messages(global_data);
-    //         global_data.clear();
-    //     }
-    // }
+        while (true) {
+            if (my_serial.IsDataAvailable()) {
+                size_t data_av = my_serial.ReadDataAvailable();
+                buffer.resize(data_av);
+
+                my_serial.ReadBytes(buffer.data(), data_av);
+
+                std::lock_guard<std::mutex> lock(data_mutex);
+                for (auto byte : buffer) {
+                    global_data.push_back(byte);
+                }
+
+                process_messages(global_data);
+                global_data.clear();
+            }
+        }
+    } catch (const LibSerial::OpenFailed&) {
+        std::cerr << "No se pudo abrir el puerto serie." << std::endl;
+    }
 }
 
 

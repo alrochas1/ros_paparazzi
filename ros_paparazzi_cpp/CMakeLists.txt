@@ -16,11 +16,11 @@ include_directories(
   include
 )
 
-add_executable(raspy_publisher_C src/raspy_publisher_C.cpp include/ros_paparazzi_cpp/com/paparazzi_receive.cpp)
-ament_target_dependencies(raspy_publisher_C rclcpp geometry_msgs sensor_msgs 
+add_executable(raspy_publisher src/raspy_publisher.cpp src/com/paparazzi_receive.c)
+ament_target_dependencies(raspy_publisher rclcpp geometry_msgs sensor_msgs 
   ros_paparazzi_interfaces)
 
-install(TARGETS raspy_publisher_C DESTINATION lib/${PROJECT_NAME})
+install(TARGETS raspy_publisher DESTINATION lib/${PROJECT_NAME})
 
 
 if(BUILD_TESTING)

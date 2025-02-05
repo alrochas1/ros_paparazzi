@@ -40,6 +40,7 @@ class Raspy_Publisher(Node):
         self.LiDaR_publisher = self.create_publisher(LaserScan, 'sensors/lidar', 10)
 
         autopilot_data.telemetry_data.register_callback(self.telemetry_callback)
+        autopilot_data.home_data.register_callback(self.telemetry_callback)
         autopilot_data.imu_data.register_callback(self.imu_callback)
         autopilot_data.gps_data.register_callback(self.gps_callback)
         autopilot_data.lidar_data.register_callback(self.lidar_callback)

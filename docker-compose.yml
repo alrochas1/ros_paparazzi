@@ -1,7 +1,7 @@
 services:
 
   raspy:
-    image: ucm:humble-desktop
+    image: ucm:humble-desktop-pi
     volumes:
       - /dev/ttyUSB0:/dev/ttyUSB0  # Monta el puerto serie
       - /dev/serial0:/dev/serial0  # Monta el otro puerto serie
@@ -13,7 +13,7 @@ services:
 
   # Este es para el ordenador, en la raspberry no lo voy a usar nunca 
   computer:
-    image: ucm:humble-desktop
+    image: ucm:humble-desktop-pi
     volumes:
       - /dev/ttyUSB0:/dev/serial0 # Monta el puerto serie
       - ~/ROS2/ros_ws:/ros_ws      # Monta el workspace
@@ -22,7 +22,7 @@ services:
     privileged: true
   
   container:
-    image: ucm:humble-desktop
+    image: ucm:humble-desktop-pi
     volumes:
       - /dev/ttyUSB0:/dev/ttyUSB0  # Monta el puerto serie
       - /dev/serial0:/dev/serial0  # Monta el otro puerto serie
@@ -34,7 +34,7 @@ services:
     working_dir: /ros_ws/src/ros_paparazzi
 
   installer:
-    image: ucm:humble-desktop
+    image: ucm:humble-desktop-pi
     volumes:
       - ~/ROS2/ros_ws:/ros_ws  # Monta el workspace
     working_dir: /ros_ws/src/ros_paparazzi  # Establece el directorio de trabajo

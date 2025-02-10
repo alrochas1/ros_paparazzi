@@ -1,5 +1,6 @@
 services:
 
+  # SERVICES FOR THE RASPBERRY
   raspy:
     image: ucm:humble-desktop-pi
     volumes:
@@ -10,16 +11,6 @@ services:
     command: /bin/bash -c "source /ros_ws/install/setup.bash && ros2 run ros_paparazzi_core raspy"
     privileged: true
 
-
-  # Este es para el ordenador, en la raspberry no lo voy a usar nunca 
-  computer:
-    image: ucm:humble-desktop-pi
-    volumes:
-      - /dev/ttyUSB0:/dev/serial0 # Monta el puerto serie
-      - ~/ROS2/ros_ws:/ros_ws      # Monta el workspace
-    network_mode: host              
-    command: /bin/bash -c "source /ros_ws/install/setup.bash && ros2 run ros_paparazzi_core computer"
-    privileged: true
   
   container:
     image: ucm:humble-desktop-pi
@@ -42,3 +33,43 @@ services:
     command: /bin/bash -c "./install.sh"  # Ejecuta el script
     privileged: true
     restart: "no"
+
+
+  # SERVICES FOR THE COMPUTER
+  simulator:
+    image: ucm:humble-desktop
+    volumes:
+      - ~/ros2_ws:/ros2_ws      # Mount the workspace (change it for your own workspace)
+    network_mode: host              
+    command: /bin/bash -c "source /ros2_ws/install/setup.bash && ros2 launch ros_paparazzi_core sim_launch.py"
+    privileged: true
+
+
+  pc_installer:
+    image: ucm:humble-desktop
+    volumes:
+      - ~/ros2_ws:/ros2_ws  # Monta el workspace
+    working_dir: /ros2_ws/src/ros_paparazzi  # Establece el directorio de trabajo
+    network_mode: host
+    command: /bin/bash -c "./install.sh"  # Ejecuta el script
+    privileged: true
+    restart: "no"
+
+  pc_container:
+    image: ucm:humble-desktop
+    volumes:
+      - ~/ros2_ws:/ros2_ws      # Mount the workspace
+    stdin_open: true
+    tty: true
+    network_mode: host              
+    privileged: true
+    working_dir: /ros2_ws/src/ros_paparazzi
+
+  
+  gcs:
+    image: ucm:humble-desktop
+    volumes:
+      - ~/ros2_ws:/ros2_ws      # Monta el workspace
+    network_mode: host              
+    command: /bin/bash -c "source /ros2_ws/install/setup.bash && ros2 launch ros_paparazzi_core bokeh_launch.py"
+    privileged: true

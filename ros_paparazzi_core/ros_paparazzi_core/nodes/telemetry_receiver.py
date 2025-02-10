@@ -23,7 +23,7 @@ class Telemetry_Receiver(Node):
         
 
     def imu_callback(self, msg):
-        gcs_data.imu_data = [msg.x/1024, msg.y/1024, msg.z/1024]
+        gcs_data.imu_data = [msg.x, msg.y, msg.z]
 
     def gps_callback(self, msg):
         gcs_data.gps_data = [msg.latitude, msg.longitude]

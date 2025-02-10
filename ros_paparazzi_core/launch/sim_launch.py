@@ -14,29 +14,4 @@ def generate_launch_description():
             emulate_tty=True
         ),
 
-        # Node(
-        #     package='ros_paparazzi_core',
-        #     executable='sim:gps',
-        #     name='GPS_SIM',
-        #     output='screen',
-        #     emulate_tty=True,
-        # ),
-
-        # Node(
-        #     package='ros_paparazzi_core',
-        #     executable='sim:imu',
-        #     name='IMU_SIM',
-        #     output='screen',
-        #     emulate_tty=True
-        # ),
-
-
-        Node(
-            package='ros_paparazzi_core',
-            executable='sim:kalman',
-            name='KALMAN_SIM',
-            output='screen',
-            emulate_tty=True
-        )
-
     ])

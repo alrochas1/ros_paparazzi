@@ -11,8 +11,8 @@ This repository contains two packages:
 
 ## Requirements
 
-- ROS 2 Humble
-- A Raspberry with a SSH configured
+- ROS 2 Humble (a Docker image is also available).
+- A Raspberry with a SSH configured (SSH is no longer required after installation)
 
 
 ## Setup Instructions
@@ -24,7 +24,8 @@ cd {ROS_WORKSPACE}/src
 git clone {REPOSITORY}
 ```
 
-For an easy install, a `./install.sh` is included (you can also use colcon to build the package).
+For an easy installation, a `./install.sh` is included (you can also use colcon to build the package).
+If you dont have ROS2 in your computer, check the docker section.
 
 
 ## Running the Nodes
@@ -35,7 +36,7 @@ At the moment there are four nodes:
 - **Telemetry_Receiver**: Receive the telemetry info (currently position and IMU)
 - **X_Button**: Multiple Nodes to respond to the buttons of the UI
 
-![Nodes Diagram](rosgraph3.png)
+![Nodes Diagram](./graphs/rosgraph3.png)
 
 In your computer, launch the UI with
 ```
@@ -44,19 +45,6 @@ ros2 run ros_paparazzi_core bokeh_serve
 
 For launching the node in the raspberry, a script `launch_ros_node.sh` is provided.
 
-<!--  
-Launch files are provided to make running the nodes easier.
-Use `main_launch.py` for launching the nodes that will run indefinitely
-
-```
-ros2 launch ros_paparazzi_core main_launch.py
-```
-
-Use `send_launch.py` to send a waypoint to the autopilot
-
-```
-ros2 launch ros_paparazzi_core send_launch.py
-``` -->
 
 <!-- TODO: Add the ROS argument instructions -->
 
@@ -78,5 +66,29 @@ ros2 launch ros_paparazzi_core sim_launch.py
 
 You will probably need to update the path from which the data is read in `sim_config.yaml`
 
+## Docker
+
+If you dont have ROS2 Humble installed on your computer, you can use the provided Docker image:
+
+```bash
+docker pull alrochas01/ucm-humble:latest
+docker tag alrochas01/ucm-humble:latest ucm:humble-desktop
+docker rmi alrochas01/ucm-humble:latest
+```
+
+Install the repository with:
+```bash
+docker compose up installer
+```
+
+Then for lauching the UI you can use:
+```bash
+docker compose up gcs
+```
+
+and for lauching the simulation (not working yet)
+```bash
+docker compose up simulator
+```
 
 

@@ -1,4 +1,0 @@
-x = -30
-y = 30
-altitude = 650000
-waypoint_id = 5

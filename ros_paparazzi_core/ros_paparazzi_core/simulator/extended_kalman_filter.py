@@ -100,8 +100,8 @@ class SIM_Kalman(Node):
         self.get_logger().debug(f"dt = {dt}")
         ax = msg.imu.x / 1024.0
         ay = msg.imu.y / 1024.0
-        az = msg.imu.y / 1024.0     # Esto realmente es wz
-        U = np.array([ax, ay, az])
+        wz = msg.imu.z / 1024.0     # Esto realmente es wz
+        U = np.array([ax, ay, wz])
 
         # Predicción del estado: X = f(X, U)
         self.X = self.f(self.X, U, dt)

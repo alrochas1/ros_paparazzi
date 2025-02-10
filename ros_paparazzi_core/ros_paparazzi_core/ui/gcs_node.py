@@ -19,9 +19,9 @@ import numpy as np
 # TEMPORAL: For testing de IMU
 def calculate_imu():
 
-    ux = np.mean(imu_source.data['x'])
-    uy = np.mean(imu_source.data['y'])
-    uz = np.mean(imu_source.data['z'])
+    # ux = np.mean(imu_source.data['x'])
+    # uy = np.mean(imu_source.data['y'])
+    # uz = np.mean(imu_source.data['z'])
 
     var_x = np.var(imu_source.data['x'])
     var_y = np.var(imu_source.data['y'])
@@ -33,8 +33,8 @@ def calculate_imu():
 # TEMPORAL: For testing de GPS
 def calculate_gps():
 
-    ux = np.mean(gps_source.data['x'])
-    uy = np.mean(gps_source.data['y'])
+    # ux = np.mean(gps_source.data['x'])
+    # uy = np.mean(gps_source.data['y'])
 
     var_x = np.var(gps_source.data['x'])
     var_y = np.var(gps_source.data['y'])
@@ -46,7 +46,6 @@ def update_ui():
     [latitude, longitude, altitude] = gcs_data.telemetry_data.recover()
     v1x.value = f"Latitude={latitude:.4f}"
     v1y.value = f"Longitude={longitude:.4f}"
-
 
     [origin_x, origin_y] = wgs84_to_epsg(gcs_data.origin[0], gcs_data.origin[1])
     [gps_x, gps_y] = wgs84_to_epsg(gcs_data.gps_data[0], gcs_data.gps_data[1])

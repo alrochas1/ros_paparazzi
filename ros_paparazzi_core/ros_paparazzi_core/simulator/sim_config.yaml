@@ -1,0 +1,2 @@
+# simulator_data_path: "~/Documents/Paparazzi/sim/ros2/"
+simulator_data_path: "~/ros2_ws/src/ros_paparazzi/ros_paparazzi_core/ros_paparazzi_core/simulator/data"

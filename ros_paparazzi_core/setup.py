@@ -34,8 +34,9 @@ setup(
                 'bokeh_serve = ros_paparazzi_core.scripts.bokeh_serve:main',
                 # Simulator
                 'sim:core = ros_paparazzi_core.simulator.sim_core:main',
-                'sim:imu = ros_paparazzi_core.simulator.sim_imu:main',
-                'sim:gps = ros_paparazzi_core.simulator.sim_gps:main',
+                'sim:core_kf = ros_paparazzi_core.simulator.sim_core_kalman:main',
+                'sim:imu = ros_paparazzi_core.simulator.sim_imu:main',      # Legacy
+                'sim:gps = ros_paparazzi_core.simulator.sim_gps:main',      # Legacy
                 'sim:kalman = ros_paparazzi_core.simulator.extended_kalman_filter:main',
         ],
         'launch.frontend': [

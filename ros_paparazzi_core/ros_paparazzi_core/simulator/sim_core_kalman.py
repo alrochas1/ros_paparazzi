@@ -4,22 +4,27 @@ from rclpy.node import Node
 from geometry_msgs.msg import Vector3
 from sensor_msgs.msg import NavSatFix
 
-from ros_paparazzi_core.aux import sim_functions
-from ros_paparazzi_interfaces.msg import KalmanPredict 
-from ros_paparazzi_interfaces.msg import KalmanUpdate
+from ros_paparazzi_core.aux import sim_functions, geo_tools
+from ros_paparazzi_interfaces.msg import KalmanPredict, KalmanUpdate 
+from ros_paparazzi_interfaces.msg import Waypoint
+from ros_paparazzi_core.data import gcs_data
 
 import os
 import time
 
+
+or_x = gcs_data.origin[0]; or_y = gcs_data.origin[1]
+
 class SIM_CORE(Node):
 
     def __init__(self):
-        super().__init__('SIM_CORE')
+        super().__init__('SIM_CORE_EKF')
 
         self.IMU_publisher = self.create_publisher(Vector3, 'sensors/imu', 10)
         self.GPS_publisher = self.create_publisher(NavSatFix, 'sensors/gps', 10)
         self.KalmanPredict = self.create_publisher(KalmanPredict, 'kalman/predict', 10)
         self.KalmanUpdate = self.create_publisher(KalmanUpdate, 'kalman/update', 10)
+        self.Pos_publisher = self.create_publisher(Waypoint, 'waypoints/telemetry_gps', 10)
 
         # Configuración
         config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sim_config.yaml')
@@ -90,6 +95,13 @@ class SIM_CORE(Node):
         kf.dt = self.t_imu[self.imu_index] - self.t_imu[self.imu_index-1]
         self.KalmanPredict.publish(kf)
         self.get_logger().info(f'Publishing IMU_Data [t={self.t_imu[self.imu_index]}]: [{imu_msg.x}, {imu_msg.y}, {imu_msg.z}]')
+
+        lat, lon = geo_tools.ltp_to_wgs84(or_x, or_y, self.py[self.imu_index]/256, self.px[self.imu_index]/256)
+        pos_msg = Waypoint()
+        pos_msg.gps.latitude = lat
+        pos_msg.gps.longitude = lon
+        self.Pos_publisher.publish(pos_msg)
+        self.get_logger().info(f'Publishing Position [t={self.t_imu[self.imu_index]}]: [{pos_msg.gps.latitude}, {pos_msg.gps.longitude}]')
 
         self.imu_index += 1
 

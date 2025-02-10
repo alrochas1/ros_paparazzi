@@ -17,10 +17,10 @@ import numpy as np
 or_x = gcs_data.origin[0]; or_y = gcs_data.origin[1]
 
 # For the filter
-R2_IMU = 2.5e-4 # Varianza de la IMU
+R2_IMU = 2.5e-5 # Varianza de la IMU
 RP = 0.01          # Varianza de la Posición del GPS
 RV = 0.01          # Varianza de la Velocidad del GPS
-RT = 1         # Varianza de la Actitud
+RT = 0.1         # Varianza de la Actitud
 
 
 class SIM_Kalman(Node):
@@ -28,7 +28,7 @@ class SIM_Kalman(Node):
     def __init__(self):
         super().__init__('SIM_Extended_Kalman')
 
-        self.Kalman_publisher = self.create_publisher(Waypoint, 'waypoints/telemetry_gps', 10)
+        self.Kalman_publisher = self.create_publisher(Waypoint, 'kalman/state', 10)
         self.PREDICT_subscription = self.create_subscription(KalmanPredict, 'kalman/predict', self.kalman_predict, 10)
         self.UPDATE_subscription = self.create_subscription(KalmanUpdate, 'kalman/update', self.kalman_update, 10)
 
@@ -39,7 +39,7 @@ class SIM_Kalman(Node):
         rho = R2_IMU # * pow(dt, 4)
 
         self.Q = np.eye(5) * rho
-        self.P = np.eye(5) * 100
+        self.P = np.eye(5) * 0.8
         self.H = np.eye(5)
         self.R = np.matrix([
               [RP, 0,   0,   0,  0],
@@ -144,7 +144,9 @@ class SIM_Kalman(Node):
         state.gps.altitude = 650.0    # Por defecto
         state.wp_id = 0
 
-        self.Kalman_publisher.publish(state) 
+        self.Kalman_publisher.publish(state)  # Temporalmente lo puedo deshabilitar
+        # gcs_data.sim_data.update(state.gps.latitude, state.gps.longitude, state.gps.altitude)   
+        # gcs_data.sim_data.update(40, -3.7, 0)
         self.get_logger().info(f'Publishing Telemetry_Data: [{state.gps.latitude:.7f}, {state.gps.longitude:.7f}]')
 
         # TEST

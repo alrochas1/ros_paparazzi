@@ -9,7 +9,7 @@ def generate_launch_description():
         Node(
             package='ros_paparazzi_core',
             executable='sim:core_kf',
-            name='SIM_CORE',
+            name='SIM_CORE_KF',
             output='screen',
             emulate_tty=True
         ),
@@ -17,7 +17,7 @@ def generate_launch_description():
         Node(
             package='ros_paparazzi_core',
             executable='sim:kalman',
-            name='KALMAN_SIM',
+            name='SIM_KALMAN',
             output='screen',
             emulate_tty=True
         )

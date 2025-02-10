@@ -1,4 +1,4 @@
-# File with the data to the bokeh
+# File with the data for the bokeh UI
 
 class TelemetryData():
     def __init__(self):
@@ -73,6 +73,7 @@ class TerminalData():
     
 
 telemetry_data = TelemetryData()
+sim_data = TelemetryData()
 waypoint_data = WaypointData()
 usv_state = USV_State()
 terminal_data = TerminalData()
@@ -81,5 +82,6 @@ imu_data = [0, 0, 0]
 gps_data = [0, 0]
 time = 0.0
 
-origin = [40.4509250, -3.7271889, 650]
+# origin = [40.4509250, -3.7271889, 650]  # Default
+origin = [40.4513231, -3.7290740, 650]  # Football
 raspy_status = False

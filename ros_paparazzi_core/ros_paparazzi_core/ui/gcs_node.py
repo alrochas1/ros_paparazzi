@@ -43,14 +43,18 @@ def calculate_gps():
 
 
 def update_ui():
-    [latitude, longitude, altitude] = gcs_data.telemetry_data.recover()
-    v1x.value = f"Latitude={latitude:.4f}"
-    v1y.value = f"Longitude={longitude:.4f}"
+    [latitude, longitude, _] = gcs_data.telemetry_data.recover()
+    [sim_lat, sim_lon, _] = gcs_data.sim_data.recover()
+    v1x.value = f"Latitude={sim_lat:.4f}"
+    v1y.value = f"Longitude={sim_lon:.4f}"
 
+    # Convierte unidades
     [origin_x, origin_y] = wgs84_to_epsg(gcs_data.origin[0], gcs_data.origin[1])
     [gps_x, gps_y] = wgs84_to_epsg(gcs_data.gps_data[0], gcs_data.gps_data[1])
     [vehicle_x, vehicle_y] = wgs84_to_epsg(latitude, longitude)
+    [sim_x, sim_y] = wgs84_to_epsg(sim_lat, sim_lon)
 
+    # Estela de las trayectorias
     if vehicle_x != 0 and vehicle_y != 0:
         trajectory_x = list(tray_source.data["tray_x"])
         trajectory_x.append(vehicle_x)
@@ -62,10 +66,24 @@ def update_ui():
 
         tray_source.data = dict(tray_x=trajectory_x, tray_y=trajectory_y)
 
+    if sim_x != 0 and sim_y != 0:
+        sim_trajectory_x = list(sim_tray_source.data["sim_tray_x"])
+        sim_trajectory_x.append(sim_x)
+        sim_trajectory_y = list(sim_tray_source.data["sim_tray_y"])
+        sim_trajectory_y.append(sim_y)
+        if len(sim_trajectory_x) > 100:
+            sim_trajectory_x.pop(0)
+            sim_trajectory_y.pop(0)
+
+        sim_tray_source.data = dict(sim_tray_x=sim_trajectory_x, sim_tray_y=sim_trajectory_y)
+
+
+    # Actualiza el mapa
     map_source.data = dict(
         origin_x=[origin_x], origin_y=[origin_y], 
         gps_x=[gps_x], gps_y=[gps_y],
         vehicle_x=[vehicle_x], vehicle_y=[vehicle_y],
+        sim_x=[sim_x], sim_y=[sim_y],
     )
     
 
@@ -125,14 +143,18 @@ map_source = ColumnDataSource(data=dict(
     origin_x=[], origin_y=[], 
     vehicle_x=[], vehicle_y=[], 
     gps_x=[], gps_y=[], 
+    sim_x=[], sim_y=[]
 ))
 tray_source = ColumnDataSource(data=dict(tray_x=[], tray_y=[]))
+sim_tray_source = ColumnDataSource(data=dict(sim_tray_x=[], sim_tray_y=[]))
+
 map_plot.scatter(x="origin_x", y="origin_y", size=12, fill_color="red", source=map_source, legend_label="Origin")
 map_plot.scatter(x="vehicle_x", y="vehicle_y", size=12, fill_color="blue", source=map_source, legend_label="Vehicle Position")
 map_plot.line(x="tray_x", y="tray_y", line_width=2, color="blue", source=tray_source, legend_label="Trajectory")
 map_plot.scatter(x="gps_x", y="gps_y", size=12, fill_color="green", source=map_source, legend_label="GPS Measure")
+map_plot.scatter(x="sim_x", y="sim_y", size=12, fill_color="orange", source=map_source, legend_label="Simulated Position")
+map_plot.line(x="sim_tray_x", y="sim_tray_y", line_width=2, color="orange", source=sim_tray_source, legend_label="Simulated Trajectory")
 
-# Dos plots por si acaso tambien
 imu_source = ColumnDataSource(data=dict(time=[], x=[], y=[], z=[]))
 imu_plot_x = figure(title="Accel X", x_axis_label="Time (s)", y_axis_label="Acceleration (m/s^2)", width=300, height=200)
 imu_plot_x.line('time', 'x', source=imu_source, line_width=2, color='red')

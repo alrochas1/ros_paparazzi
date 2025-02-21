@@ -1,4 +1,24 @@
+import numpy as np
+
 from bokeh.models import Div
+
+# Icono de Flecha 
+arrow_size = 3.5
+arrow_x = [i / arrow_size for i in [0, -0.7, 1, -0.7]]
+arrow_y = [i / arrow_size for i in [0, -1, 0, 1]]
+
+def update_marker(source, pos_x, pos_y, yaw):
+
+    cos_yaw, sin_yaw = np.cos(yaw), np.sin(yaw)
+
+    rotated_x = [cos_yaw * x - sin_yaw * y + pos_x for x, y in zip(arrow_x, arrow_y)]
+    rotated_y = [sin_yaw * x + cos_yaw * y + pos_y for x, y in zip(arrow_x, arrow_y)]
+
+    # Actualizar la fuente de datos en Bokeh
+    source = dict(xs=[rotated_x], ys=[rotated_y])
+    return source
+
+
 
 # NOT USED
 class TerminalManager:

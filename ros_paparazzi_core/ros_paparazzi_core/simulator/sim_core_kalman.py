@@ -100,6 +100,7 @@ class SIM_CORE(Node):
         pos_msg = Waypoint()
         pos_msg.gps.latitude = lat
         pos_msg.gps.longitude = lon
+        pos_msg.gps.altitude = float(self.theta) # Actitud
         self.Pos_publisher.publish(pos_msg)
         self.get_logger().info(f'Publishing Position [t={self.t_imu[self.imu_index]}]: [{pos_msg.gps.latitude}, {pos_msg.gps.longitude}]')
 
@@ -115,18 +116,19 @@ class SIM_CORE(Node):
         msg = NavSatFix()
         kf_msg.gps_speed.x = float(self.vx[self.gps_index] * 1e-02)
         kf_msg.gps_speed.x = float(self.vy[self.gps_index] * 1e-02)
-        kf_msg.gps_speed.z = float(self.vz[self.gps_index] * 1e-02)
+        kf_msg.gps_speed.z = float(self.vz[self.gps_index] * 1e-02)   
         kf_msg.theta = float(self.theta)
         
         msg.latitude = float(self.lat[self.gps_index] * 1e-07)
         msg.longitude = float(self.lon[self.gps_index] * 1e-07)
         kf_msg.latitude = msg.latitude
         kf_msg.longitude = msg.longitude
+        
 
         self.GPS_publisher.publish(msg)
         self.KalmanUpdate.publish(kf_msg)
 
-        self.get_logger().info(f'Publishing GPS_Speed [t={self.t_gps[self.gps_index]}]: [{msg.latitude}, {msg.longitude}]')
+        self.get_logger().info(f'Publishing GPS_Speed [t={self.t_gps[self.gps_index]}]: [{msg.latitude}, {msg.longitude}, Theta = {self.theta}]')
         self.gps_index += 1
 
 

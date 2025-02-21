@@ -141,12 +141,10 @@ class SIM_Kalman(Node):
         state = Waypoint()
         state.gps.latitude = float(lat)
         state.gps.longitude = float(lon)
-        state.gps.altitude = 650.0    # Por defecto
+        state.gps.altitude = float(self.X[4])    # Aqui pongo la actitud como apaño
         state.wp_id = 0
 
-        self.Kalman_publisher.publish(state)  # Temporalmente lo puedo deshabilitar
-        # gcs_data.sim_data.update(state.gps.latitude, state.gps.longitude, state.gps.altitude)   
-        # gcs_data.sim_data.update(40, -3.7, 0)
+        self.Kalman_publisher.publish(state)
         self.get_logger().info(f'Publishing Telemetry_Data: [{state.gps.latitude:.7f}, {state.gps.longitude:.7f}]')
 
         # TEST

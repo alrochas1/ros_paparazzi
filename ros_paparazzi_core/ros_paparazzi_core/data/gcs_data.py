@@ -5,14 +5,18 @@ class TelemetryData():
         self.longitude = 0.0
         self.latitude = 0.0
         self.altitude = 0.0
+        self.attitude = 1.57
 
     def update(self, longitude, latitude, altitude):
         self.longitude = longitude
         self.latitude = latitude
         self.altitude = altitude
+        
+    def update_yaw(self, att):
+        self.attitude = att
 
     def recover(self):
-        return [self.longitude, self.latitude, self.altitude]
+        return [self.longitude, self.latitude, self.altitude, self.attitude]
 
     def __repr__(self):
         return f"TelemetryData(longitude={self.longitude}, latitude={self.latitude}, altitude={self.altitude})"

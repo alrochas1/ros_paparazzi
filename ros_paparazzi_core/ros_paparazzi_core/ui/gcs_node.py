@@ -4,16 +4,18 @@
 import rclpy
 
 from ros_paparazzi_core.data import gcs_data
-from ros_paparazzi_core.ui import ui_functions
+from ros_paparazzi_core.ui import ui_functions, ui_elements
 from ros_paparazzi_core.ui.ros_nodes import start_nodes
 from ros_paparazzi_core.aux.geo_tools import wgs84_to_epsg
 
 
 from bokeh.layouts import column, row, Spacer, gridplot
-from bokeh.models import TextInput, Button, ColumnDataSource, Div
+from bokeh.models import TextInput, Button, ColumnDataSource, Div, ImageURL
 from bokeh.plotting import figure, curdoc
 
 import numpy as np
+
+LEN_TRAY = 200
 
 
 # TEMPORAL: For testing de IMU
@@ -43,10 +45,10 @@ def calculate_gps():
 
 
 def update_ui():
-    [latitude, longitude, _] = gcs_data.telemetry_data.recover()
-    [sim_lat, sim_lon, _] = gcs_data.sim_data.recover()
-    v1x.value = f"Latitude={sim_lat:.4f}"
-    v1y.value = f"Longitude={sim_lon:.4f}"
+    [latitude, longitude, _, veh_yaw] = gcs_data.telemetry_data.recover()
+    [sim_lat, sim_lon, _, sim_yaw] = gcs_data.sim_data.recover()
+    v1x.value = f"Angulo Real={veh_yaw:.4f}"
+    v1y.value = f"Angulo Simu={sim_yaw:.4f}"
 
     # Convierte unidades
     [origin_x, origin_y] = wgs84_to_epsg(gcs_data.origin[0], gcs_data.origin[1])
@@ -60,7 +62,7 @@ def update_ui():
         trajectory_x.append(vehicle_x)
         trajectory_y = list(tray_source.data["tray_y"])
         trajectory_y.append(vehicle_y)
-        if len(trajectory_x) > 100:
+        if len(trajectory_x) > LEN_TRAY:
             trajectory_x.pop(0)
             trajectory_y.pop(0)
 
@@ -71,7 +73,7 @@ def update_ui():
         sim_trajectory_x.append(sim_x)
         sim_trajectory_y = list(sim_tray_source.data["sim_tray_y"])
         sim_trajectory_y.append(sim_y)
-        if len(sim_trajectory_x) > 100:
+        if len(sim_trajectory_x) > LEN_TRAY:
             sim_trajectory_x.pop(0)
             sim_trajectory_y.pop(0)
 
@@ -82,15 +84,17 @@ def update_ui():
     map_source.data = dict(
         origin_x=[origin_x], origin_y=[origin_y], 
         gps_x=[gps_x], gps_y=[gps_y],
-        vehicle_x=[vehicle_x], vehicle_y=[vehicle_y],
-        sim_x=[sim_x], sim_y=[sim_y],
+        vehicle_x=[vehicle_x], vehicle_y=[vehicle_y], veh_yaw=[veh_yaw],
+        sim_x=[sim_x], sim_y=[sim_y], sim_yaw=[sim_yaw]
     )
+    sim_marker.data = ui_elements.update_marker(sim_marker.data, sim_x, sim_y, sim_yaw)
+    veh_marker.data = ui_elements.update_marker(veh_marker.data, vehicle_x, vehicle_y, veh_yaw)
     
 
     if gcs_data.raspy_status:   raspy_button.button_type = "success"
     else:  raspy_button.button_type = "danger" 
 
-    terminal_output.text = gcs_data.terminal_data.recover_message()
+    terminal_output.text = gcs_data.terminal_data.recover_message() # REVISAR
 
     
     if gcs_data.time > 2:
@@ -138,22 +142,33 @@ raspy_button = Button(label='Connect Raspberry', width=200, height=40)
 # raspy_button.on_click(raspy_button_Click)
 button3 = Button(label='Button 3', width=200, height=40)
 
+# Mapa ---------------
 map_plot = ui_functions.plot_map()
 map_source = ColumnDataSource(data=dict(
     origin_x=[], origin_y=[], 
-    vehicle_x=[], vehicle_y=[], 
+    vehicle_x=[], vehicle_y=[], veh_yaw=[], 
     gps_x=[], gps_y=[], 
-    sim_x=[], sim_y=[]
+    sim_x=[], sim_y=[], sim_yaw=[]
 ))
 tray_source = ColumnDataSource(data=dict(tray_x=[], tray_y=[]))
 sim_tray_source = ColumnDataSource(data=dict(sim_tray_x=[], sim_tray_y=[]))
 
+sim_marker = ColumnDataSource(data=dict(xs=[], ys=[]))
+veh_marker = ColumnDataSource(data=dict(xs=[], ys=[]))
+map_plot.patches(xs='xs', ys='ys', source=sim_marker,
+                 fill_color="orange", line_color="black")
+map_plot.patches(xs='xs', ys='ys', source=veh_marker,
+                 fill_color="blue", line_color="black")
+
 map_plot.scatter(x="origin_x", y="origin_y", size=12, fill_color="red", source=map_source, legend_label="Origin")
-map_plot.scatter(x="vehicle_x", y="vehicle_y", size=12, fill_color="blue", source=map_source, legend_label="Vehicle Position")
-map_plot.line(x="tray_x", y="tray_y", line_width=2, color="blue", source=tray_source, legend_label="Trajectory")
 map_plot.scatter(x="gps_x", y="gps_y", size=12, fill_color="green", source=map_source, legend_label="GPS Measure")
-map_plot.scatter(x="sim_x", y="sim_y", size=12, fill_color="orange", source=map_source, legend_label="Simulated Position")
+# map_plot.scatter(x="vehicle_x", y="vehicle_y", size=12, fill_color="blue", source=map_source, legend_label="Vehicle Position", marker="triangle", angle="veh_yaw")
+map_plot.line(x="tray_x", y="tray_y", line_width=2, color="blue", source=tray_source, legend_label="Vehicle Trajectory")
+# map_plot.scatter(x="sim_x", y="sim_y", size=12, fill_color="orange", source=map_source, legend_label="Simulated Position", marker="triangle", angle="sim_yaw")
 map_plot.line(x="sim_tray_x", y="sim_tray_y", line_width=2, color="orange", source=sim_tray_source, legend_label="Simulated Trajectory")
+
+
+# ---------------
 
 imu_source = ColumnDataSource(data=dict(time=[], x=[], y=[], z=[]))
 imu_plot_x = figure(title="Accel X", x_axis_label="Time (s)", y_axis_label="Acceleration (m/s^2)", width=300, height=200)

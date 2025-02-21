@@ -54,7 +54,7 @@ For launching the node in the raspberry, a script `launch_ros_node.sh` is provid
 Currently, there are two working buttons
 - The Send Waypoint button will send the waypoint coordinates indicated above itself.
 - The Request HOME will reset the coordinates origin
-- The Connect Raspberry will launch the node in the Raspberry (not working)
+- The Connect Raspberry will launch the node in the Raspberry (not working, probably unnecesary)
 
 
 ## The Simulator

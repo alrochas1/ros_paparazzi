@@ -22,10 +22,12 @@ class Telemetry_Receiver(Node):
             self.update_home(msg)
         elif msg.wp_id == 0:
             gcs_data.telemetry_data.update(msg.gps.latitude, msg.gps.longitude, msg.gps.altitude)
+            gcs_data.telemetry_data.update_yaw(msg.gps.altitude)    # Temporal
 
 
     def kalman_callback(self, msg):
-        gcs_data.sim_data.update(msg.gps.latitude, msg.gps.longitude, msg.gps.altitude)        
+        gcs_data.sim_data.update(msg.gps.latitude, msg.gps.longitude, msg.gps.altitude)  
+        gcs_data.sim_data.update_yaw(msg.gps.altitude)      
 
     def imu_callback(self, msg):
         gcs_data.imu_data = [msg.x, msg.y, msg.z]

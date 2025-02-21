@@ -20,6 +20,8 @@ PPZ_IMU_BYTE = 0x49  # "I"
 PPZ_MEASURE_BYTE = 0x4D  # "M"
 PPZ_GPS_BYTE = 0x47  # "G"
 PPZ_LIDAR_BYTE = 0x4C; # "L"
+PPZ_SONDA_UP_BYTE = 0x55; # "U"
+PPZ_SONDA_DOWN_BYTE = 0x44; # "D"
 COM_FINAL_BYTE = 0x46  # "F"
 COM_ANSWER_BYTE = 0x4F  # "O"
 COM_NO_MEASURE_BYTE = 0x4E  # "N"
@@ -388,6 +390,44 @@ class PPZI_TELEMETRY(threading.Thread):
 
                         autopilot_data.lidar_data.update(lidar_dist, lidar_ang)
                         self.logger.debug(f"[PPZG_RECEIVE] - LiDaR Data: Distancia = {lidar_dist}")
+
+
+                    elif message[1] == PPZ_SONDA_UP_BYTE:
+                        if len(message) != 6:
+                            self.logger.debug(f"[PPZG_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 6, Received {len(message)}")
+                            time.sleep(RECEIVE_INTERVAL)
+                            continue
+
+                        hex_checksumppzz = [message[5], message[4]]
+                        checksumppzz = serial_byteToint(hex_checksumppzz, 2)
+
+                        # TODO: Solve checksum issue
+                        # if not compare_checksum(message, checksumppzz, data_av):
+                        #     self.logger.info("[PPZG_RECEIVE] - Checksum LIDAR erróneo.")
+                        #     time.sleep(RECEIVE_INTERVAL)
+                        #     continue
+
+                        autopilot_data.sonda_status.update("UP")
+                        self.logger.debug(f"[PPZG_RECEIVE] - Sonda Status = UP")
+
+
+                    elif message[1] == PPZ_SONDA_DOWN_BYTE:
+                        if len(message) != 6:
+                            self.logger.debug(f"[PPZG_RECEIVE] - NÚMERO BYTES INCORRECTO --> Expected 6, Received {len(message)}")
+                            time.sleep(RECEIVE_INTERVAL)
+                            continue
+
+                        hex_checksumppzz = [message[5], message[4]]
+                        checksumppzz = serial_byteToint(hex_checksumppzz, 2)
+
+                        # TODO: Solve checksum issue
+                        # if not compare_checksum(message, checksumppzz, data_av):
+                        #     self.logger.info("[PPZG_RECEIVE] - Checksum LIDAR erróneo.")
+                        #     time.sleep(RECEIVE_INTERVAL)
+                        #     continue
+
+                        autopilot_data.sonda_status.update("DOWN")
+                        self.logger.debug(f"[PPZG_RECEIVE] - Sonda Status = DOWN")
 
                     else:
                         self.logger.debug(f"[PPZG_RECEIVE] - Message not recognized")

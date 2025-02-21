@@ -132,6 +132,28 @@ class Lidar_Data():
 
     def __repr__(self):
         return f"LidarData = {self.distance} m, Angulo = {self.angle} º"
+    
+
+class Sonda_Status():
+    def __init__(self):
+        self.status = 0
+
+    def update(self, status):
+        self.status = status
+        self.send_callback()
+
+    def recover(self):
+        return [self.status]
+    
+    def send_callback(self):
+        for callback in self.callbacks:
+            callback(self)
+
+    def register_callback(self, callback):
+        self.callbacks.append(callback)
+
+    def __repr__(self):
+        return f"Sonda Status = {sonda_status}"
 
     
 
@@ -143,4 +165,7 @@ home_data = TelemetryData()         # For sending the HOME position to the compu
 imu_data = IMU_Data()
 gps_data = GPS_Data()
 lidar_data = Lidar_Data()
+
+# BOAT
+sonda_status = Sonda_Status()    # static, up, down
 

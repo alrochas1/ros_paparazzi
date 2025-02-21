@@ -8,6 +8,7 @@ from rclpy.node import Node
 
 from ros_paparazzi_interfaces.msg import Waypoint
 from geometry_msgs.msg import Vector3
+from std_msgs.msg import String
 from sensor_msgs.msg import NavSatFix, LaserScan
 
 from ros_paparazzi_core.data import autopilot_data
@@ -38,11 +39,13 @@ class Raspy_Publisher(Node):
         self.IMU_publisher = self.create_publisher(Vector3, 'sensors/imu', 10)
         self.GPS_publisher = self.create_publisher(NavSatFix, 'sensors/gps', 10)
         self.LiDaR_publisher = self.create_publisher(LaserScan, 'sensors/lidar', 10)
+        self.Sonda_publisher = self.create_publisher(String, 'sonda_status', 10)
 
         autopilot_data.telemetry_data.register_callback(self.telemetry_callback)
         autopilot_data.imu_data.register_callback(self.imu_callback)
         autopilot_data.gps_data.register_callback(self.gps_callback)
         autopilot_data.lidar_data.register_callback(self.lidar_callback)
+        autopilot_data.sonda_status.register_callback(self.sonda_callback)
 
         # self.create_monitor_threads()
         
@@ -116,6 +119,13 @@ class Raspy_Publisher(Node):
 
         self.LiDaR_publisher.publish(msg)
         self.get_logger().info(f'Publishing LIDAR_Data: {data.distance} m, Angle: {data.angle}º')
+
+
+    def sonda_callback(self, data):
+        msg = String()
+        msg.data = data.status
+        self.Sonda_publisher.publish(msg)
+        self.get_logger().info(f'Publishing Sonda Status: {data.status}')
         
 
 

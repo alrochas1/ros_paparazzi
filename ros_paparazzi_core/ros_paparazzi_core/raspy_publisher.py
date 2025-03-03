@@ -34,6 +34,7 @@ class Raspy_Publisher(Node):
     def __init__(self):
         super().__init__('Raspy_Publisher')
         self.telemetry_publisher = self.create_publisher(Waypoint, 'waypoints/telemetry_gps', 10)
+        self.reference_publisher = self.create_publisher(Waypoint, 'waypoints/reference', 10)
         self.suscriber = self.create_subscription(Waypoint, 'waypoints/datalink', self.waypoint_callback, 10)
         self.IMU_publisher = self.create_publisher(Vector3, 'sensors/imu', 10)
         self.GPS_publisher = self.create_publisher(NavSatFix, 'sensors/gps', 10)
@@ -81,8 +82,13 @@ class Raspy_Publisher(Node):
         msg.gps.latitude = float(data.latitude*1e-07)
         msg.gps.altitude = float(data.altitude*1e-07)
         msg.wp_id = int(data.wp_id)
-        self.telemetry_publisher.publish(msg)
-        self.get_logger().info(f'Publishing Telemetry_Data[{msg.wp_id}]: [{msg.gps.latitude:.7f}, {msg.gps.longitude:.7f}, {msg.gps.altitude:.2f}]')
+
+        if msg.wp_id == 0:
+            self.telemetry_publisher.publish(msg)
+            self.get_logger().info(f'Publishing Telemetry_Data[{msg.wp_id}]: [{msg.gps.latitude:.7f}, {msg.gps.longitude:.7f}, {msg.gps.altitude:.2f}]')
+        else:
+            self.reference_publisher.publish(msg)
+            self.get_logger().info(f'Publishing New Reference: [{msg.gps.latitude:.7f}, {msg.gps.longitude:.7f}]')
 
 
     def imu_callback(self, data):

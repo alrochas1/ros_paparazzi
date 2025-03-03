@@ -30,8 +30,8 @@ class SimpleSLAM(Node):
 
 
     def pos_callback(self, msg):
-        self.robot_x = msg.pose.pose.position.x
-        self.robot_y = msg.pose.pose.position.y
+        self.robot_x = msg.gps.latitude*0
+        self.robot_y = msg.gps.altitude*0
 
         # Calcular el yaw (orientación)
         orientation = msg.gps.altitude # Es el yaw, reutilizo el mensaje
@@ -44,10 +44,10 @@ class SimpleSLAM(Node):
             if msg.range_min <= distance <= msg.range_max:
                 # angle = msg.angle_min + i * msg.angle_increment
                 angle = -msg.angle_increment*np.pi/180
-                print(f"Distancia = {distance}, Angle = {180*(angle + self.robot_yaw)/np.pi}")
+                print(f"Distancia = {distance}, Angle = {180*(self.robot_yaw - angle)/np.pi}")
                 # TODO: REVISAR. Creo que esta mal
-                obstacle_x = self.robot_x + distance * np.cos(angle + self.robot_yaw)
-                obstacle_y = self.robot_y + distance * np.sin(angle + self.robot_yaw)
+                obstacle_x = self.robot_x + distance * np.cos(self.robot_yaw - angle)
+                obstacle_y = self.robot_y + distance * np.sin(self.robot_yaw - angle)
                 print(f"Obstaculo en [{obstacle_x}, {obstacle_y}]")
 
                 # Convertir la posición del obstáculo a coordenadas del mapa

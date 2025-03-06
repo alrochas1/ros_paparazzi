@@ -31,7 +31,8 @@ class SimpleSLAM(Node):
         self.map_origin_y = -2.5    # Origen en Y (en metros)
 
         # Inicializar el mapa
-        self.map_data = np.zeros((self.map_height, self.map_width), dtype=np.int8)
+        self.map_data = np.full((self.map_height, self.map_width), -1, dtype=np.int8)
+
 
 
 
@@ -64,7 +65,7 @@ class SimpleSLAM(Node):
                     # angle = msg.angle_min + i * msg.angle_increment
                     angle = -msg.angle_increment*np.pi/180
                     print(f"Distancia = {distance}, Angle = {180*(self.robot_yaw - angle)/np.pi}")
-                    # TODO: REVISAR. Creo que esta mal
+                    # TODO: REVISAR. Creo que esta mal (a lo mejor no)
                     obstacle_x = self.robot_x + distance * np.cos(self.robot_yaw - angle)
                     obstacle_y = self.robot_y + distance * np.sin(self.robot_yaw - angle)
                     print(f"Obstaculo en [{obstacle_x}, {obstacle_y}]")
@@ -72,12 +73,29 @@ class SimpleSLAM(Node):
                     # Convertir la posición del obstáculo a coordenadas del mapa
                     map_x = int((obstacle_x - self.map_origin_x) / self.map_resolution)
                     map_y = int((obstacle_y - self.map_origin_y) / self.map_resolution)
+                    map_x0 = int((self.robot_x - self.map_origin_x) / self.map_resolution)
+                    map_y0 = int((self.robot_y - self.map_origin_y) / self.map_resolution)
+
+                    for x, y in self.bresenham(map_x0, map_y0, map_x, map_y):
+                        if 0 <= x < self.map_width and 0 <= y < self.map_height:
+                            self.map_data[y, x] = 0  # Celda libre
 
                     # Actualizar el mapa
                     if 0 <= map_x < self.map_width and 0 <= map_y < self.map_height:
                         self.map_data[map_y, map_x] = 100
+                        # self.update_map(map_x, map_y, True)
+            
             
             self.publish_map()
+
+
+    # def update_map(self, map_x, map_y, occupied):
+    #     prior = self.map_data[map_y, map_x]  # Valor actual en la celda
+        
+    #     if occupied:
+    #         self.map_data[map_y, map_x] = min(prior + 10, 100)
+    #     else:
+    #         self.map_data[map_y, map_x] = max(prior - 5, 0)
 
 
 
@@ -98,6 +116,30 @@ class SimpleSLAM(Node):
 
         self.map_pub.publish(map_msg)
         # self.get_logger().info('Mapa publicado')
+
+
+    def bresenham(self, x0, y0, x1, y1):
+        points = []
+        dx = abs(x1 - x0)
+        dy = abs(y1 - y0)
+        sx = 1 if x0 < x1 else -1
+        sy = 1 if y0 < y1 else -1
+        err = dx - dy
+
+        while True:
+            points.append((x0, y0))
+            if x0 == x1 and y0 == y1:
+                break
+            e2 = 2 * err
+            if e2 > -dy:
+                err -= dy
+                x0 += sx
+            if e2 < dx:
+                err += dx
+                y0 += sy
+
+        return points
+
 
 
 def main(args=None):

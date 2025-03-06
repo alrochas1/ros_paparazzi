@@ -73,3 +73,18 @@ services:
     network_mode: host              
     command: /bin/bash -c "source /ros2_ws/install/setup.bash && ros2 launch ros_paparazzi_core bokeh_launch.py"
     privileged: true
+
+
+  rviz2:
+    image: ucm:humble-desktop
+    volumes:
+      - ~/ros2_ws:/ros2_ws  # Monta el workspace
+      - /tmp/.X11-unix:/tmp/.X11-unix  # Permite acceso al servidor gráfico
+    environment:
+      - DISPLAY=${DISPLAY}  # Usa la pantalla del host
+    network_mode: host
+    stdin_open: true
+    tty: true
+    privileged: true
+    working_dir: /ros2_ws
+    command: /bin/bash -c "source /ros2_ws/install/setup.bash && rviz2"

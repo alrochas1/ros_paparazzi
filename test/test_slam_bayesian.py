@@ -23,12 +23,13 @@ class SimpleSLAM(Node):
         self.robot_x = 0; self.robot_y = 0; self.robot_yaw = 0
         self.lat0 = 0; self.lon0 = 0
 
-        # Parámetros del mapa
+        # Parámetros del mapa para el campo de fútbol
         self.map_resolution = 0.05  # 5 cm por celda
-        self.map_width = 500        
-        self.map_height = 500    
-        self.map_origin_x = -2.5    # Origen en X (en metros)
-        self.map_origin_y = -2.5    # Origen en Y (en metros)
+        self.map_width = int(110 / self.map_resolution)  # 110m
+        self.map_height = int(85 / self.map_resolution)  # 85m
+        self.map_origin_x = -20  # 20 metros de margen en X
+        self.map_origin_y = -20  # 20 metros de margen en Y
+
 
         # Inicializar el mapa
         self.map_data = np.full((self.map_height, self.map_width), -1, dtype=np.int8)
